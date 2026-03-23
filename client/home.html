@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Audenta</title>
+  <link rel="icon" type="image/png" href="img/Audenta.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+
+    .audenta { height: 100vh; overflow: hidden; }
+
+    /* ─── CONTENT LAYOUT ──── */
+    .page-content {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 52px 0 52px;
+      gap: 40px;
+      min-height: 0;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ─── HERO LEFT ──── */
+    .hero-section {
+      flex: 1;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding-left: 4%;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 28px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .hero-tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .hero-h1 {
+      font-family: var(--font-body);
+      font-size: clamp(36px, 4vw, 58px);
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      animation: fadeUp 0.5s 0.06s ease both;
+    }
+
+    .hero-h1 strong { font-weight: 600; font-style: normal; color: var(--text-1); }
+
+    .hero-sub {
+      font-family: var(--font-body);
+      font-size: clamp(22px, 2.4vw, 34px);
+      font-weight: 400;
+      color: var(--text-3);
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin-bottom: 24px;
+      animation: fadeUp 0.5s 0.12s ease both;
+    }
+
+    .hero-desc {
+      font-size: clamp(13px, 1vw, 14px);
+      font-weight: 400;
+      color: var(--text-2);
+      line-height: 1.7;
+      max-width: 380px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.5s 0.18s ease both;
+    }
+
+    /* ─── PILLARS BAR ──── */
+    .hero-pillars {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 0;
+      animation: fadeUp 0.5s 0.24s ease both;
+    }
+
+    .pillar-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px 6px 0;
+      border-right: 1px solid var(--border);
+      margin-right: 12px;
+    }
+
+    .pillar-item:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+
+    .pillar-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    .pillar-name {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* ─── DEMO CARD ──── */
+    .demo-wrap {
+      flex-shrink: 0;
+      width: clamp(280px, 26vw, 340px);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-right: 4%;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .demo-card {
+      width: 100%;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-2);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 290px;
+    }
+
+    .demo-card__header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+
+    .demo-card__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-2);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .demo-tab-group {
+      display: flex;
+      gap: 2px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 2px;
+    }
+
+    .demo-tab {
+      background: none;
+      border: none;
+      border-radius: 3px;
+      color: var(--text-3);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 9px;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .demo-tab:hover { color: var(--text-2); }
+    .demo-tab--active { background: var(--bg-3); color: var(--text-1); }
+
+    .demo-quick-add { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+
+    .demo-quick-add__input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      font-size: 11px;
+      font-family: var(--font-body);
+      padding: 5px 8px;
+      outline: none;
+      min-width: 0;
+      transition: border-color 0.2s;
+    }
+
+    .demo-quick-add__input::placeholder { color: var(--text-4); }
+    .demo-quick-add__input:focus { border-color: var(--border-2); }
+
+    .demo-quick-add__select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-3);
+      font-size: 10px;
+      font-family: var(--font-body);
+      padding: 5px 3px;
+      outline: none;
+      cursor: pointer;
+      max-width: 64px;
+      -webkit-appearance: none;
+    }
+
+    .demo-quick-add__btn {
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-2);
+      cursor: pointer;
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .demo-quick-add__btn:hover { background: var(--bg-4); color: var(--accent); }
+
+    .demo-todo-list { flex: 1; overflow-y: auto; min-height: 0; }
+    .demo-todo-list::-webkit-scrollbar { width: 3px; }
+    .demo-todo-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .demo-empty-state { font-size: 11px; color: var(--text-4); text-align: center; padding: 18px 0; }
+
+    .demo-todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 7px 0 7px 8px;
+      border-bottom: 1px solid var(--border);
+      border-left: 2px solid transparent;
+      position: relative;
+      animation: fadeUp 0.18s ease both;
+    }
+
+    .demo-todo-item:last-child { border-bottom: none; }
+    .demo-todo-item.completed .demo-todo-text { text-decoration: line-through; color: var(--text-4); }
+    .demo-todo-item.completed { opacity: 0.45; }
+
+    .demo-todo-check {
+      width: 13px; height: 13px;
+      border: 1px solid var(--border-2);
+      border-radius: 3px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+      transition: all 0.15s;
+      background: transparent;
+    }
+
+    .demo-todo-check:hover { border-color: var(--accent); }
+    .demo-todo-check.checked { background: var(--accent-dim); border-color: var(--accent); }
+    .demo-todo-check.checked::after {
+      content: '';
+      width: 5px; height: 3px;
+      border-left: 1.5px solid var(--accent);
+      border-bottom: 1.5px solid var(--accent);
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+
+    .demo-todo-content { flex: 1; min-width: 0; }
+    .demo-todo-text { font-size: 11px; color: var(--text-1); line-height: 1.4; display: block; }
+    .demo-todo-meta { display: flex; gap: 5px; align-items: center; margin-top: 3px; }
+
+    .demo-todo-priority {
+      font-family: var(--font-mono);
+      font-size: 9px; font-weight: 500;
+      padding: 1px 5px; border-radius: 3px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      background: var(--bg-3); color: var(--text-3);
+    }
+
+    .demo-todo-pillar {
+      font-family: var(--font-mono);
+      font-size: 9px; color: var(--text-3);
+      background: var(--bg-3); padding: 1px 5px; border-radius: 3px;
+    }
+
+    .demo-todo-delete {
+      background: none; border: none; color: var(--border-2);
+      cursor: pointer; font-size: 10px; padding: 0 2px;
+      opacity: 0; transition: opacity 0.15s, color 0.15s;
+      flex-shrink: 0; align-self: flex-start; margin-top: 1px;
+    }
+
+    .demo-todo-item:hover .demo-todo-delete { opacity: 1; }
+    .demo-todo-delete:hover { color: var(--danger); }
+
+    /* ─── SIGN-UP PANEL ──── */
+    .signup-section {
+      flex-shrink: 0;
+      width: clamp(220px, 22vw, 270px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-right: 2%;
+      animation: fadeUp 0.6s 0.15s ease both;
+    }
+
+    .signup-heading {
+      font-family: var(--font-body);
+      font-size: clamp(16px, 1.5vw, 20px);
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .signup-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .signup-fields { display: flex; flex-direction: column; gap: 7px; }
+  </style>
+</head>
+<body>
+  <div class="audenta">
+
+    <header class="site-header" role="banner">
+      <a href="home.html" class="logo-link" aria-label="Audenta Home">
+        <img class="audenta-icon" src="img/audenta-icon.png" alt="" />
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="home.html" class="nav-active">Home</a>
+        <a href="contact.html">Contact</a>
+        <a href="info.html">How it works</a>
+        <a href="features.html">Features</a>
+        <a href="download.html" class="btn-download active">Download</a>
+      </nav>
+    </header>
+
+    <main class="page-content">
+
+      <!-- ── HERO LEFT ── -->
+      <section class="hero-section" aria-labelledby="hero-heading">
+        <span class="hero-tag">
+          <span class="hero-tag-dot"></span>
+          Discipline infrastructure
+        </span>
+        <h1 class="hero-h1" id="hero-heading">
+          <strong>Stop avoiding</strong><br>hard things.
+        </h1>
+        <p class="hero-sub">We'll make sure of it.</p>
+        <p class="hero-desc">
+          Audenta tracks your milestones, records your avoidance, and enforces commitment across every pillar of your life. Not motivation. Structure.
+        </p>
+        <div class="hero-pillars" aria-label="Life pillars">
+          <div class="pillar-item"><span class="pillar-dot" style="background:#4a7c5a"></span><span class="pillar-name">Health</span></div>
+          <div class="pillar-item"><span class="pillar-dot" style="background:#4a6e9c"></span><span class="pillar-name">Career</span></div>
+          <div class="pillar-item"><span class="pillar-dot" style="background:#9a8c2a"></span><span class="pillar-name">Wealth</span></div>
+          <div class="pillar-item"><span class="pillar-dot" style="background:#7c5a9c"></span><span class="pillar-name">Mindset</span></div>
+          <div class="pillar-item"><span class="pillar-dot" style="background:#9c4a4a"></span><span class="pillar-name">Social</span></div>
+        </div>
+      </section>
+
+      <!-- ── DEMO CARD ── -->
+      <div class="demo-wrap">
+        <div class="demo-card" id="demoCard">
+          <div class="demo-card__header">
+            <span class="demo-card__title">Daily Objectives</span>
+            <div class="demo-tab-group">
+              <button class="demo-tab demo-tab--active" id="demoTabToday">Today</button>
+              <button class="demo-tab" id="demoTabTomorrow">Tomorrow</button>
+            </div>
+          </div>
+          <div class="demo-quick-add">
+            <input type="text" id="demoTaskInput" class="demo-quick-add__input" placeholder="Add task…" />
+            <select id="demoPillarSelect" class="demo-quick-add__select">
+              <option value="">Pillar</option>
+              <option value="Health">Health</option>
+              <option value="Career">Career</option>
+              <option value="Wealth">Wealth</option>
+              <option value="Mindset">Mindset</option>
+              <option value="Social">Social</option>
+            </select>
+            <select id="demoPrioritySelect" class="demo-quick-add__select">
+              <option value="high">High</option>
+              <option value="medium" selected>Med</option>
+              <option value="low">Low</option>
+            </select>
+            <button class="demo-quick-add__btn" id="demoAddBtn" aria-label="Add task">
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <div class="demo-todo-list" id="demoTodoList">
+            <div class="demo-empty-state">No tasks yet — add one above.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SIGN UP ── -->
+      <section class="signup-section" aria-labelledby="signup-heading">
+
+        <!-- SIGNUP PANEL -->
+        <div id="signupPanel">
+          <h2 id="signup-heading" class="signup-heading">Begin your system</h2>
+          <p class="signup-sub">Create an account to get started.</p>
+
+          <div class="signup-fields" autocomplete="off">
+            <label for="name-input" class="sr-only">Name</label>
+            <input id="name-input" class="form-field" type="text" placeholder="Name" autocomplete="off" />
+            <div class="err-msg" id="name-error"></div>
+
+            <label for="email-input" class="sr-only">Email</label>
+            <input id="email-input" class="form-field" type="email" placeholder="Email" autocomplete="off" />
+            <div class="err-msg" id="email-error"></div>
+
+            <!-- Hidden decoy stops Chrome injecting password manager into first visible password field -->
+            <input type="password" style="display:none" aria-hidden="true" tabindex="-1" autocomplete="new-password" />
+
+            <label for="password-input" class="sr-only">Password</label>
+            <div class="pw-wrapper">
+              <input id="password-input" class="form-field" type="password" placeholder="Password" autocomplete="new-password" />
+              <button type="button" class="pw-eye" id="pw-toggle" aria-label="Toggle password visibility">
+                <svg id="eye-open-1" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="eye-closed-1" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <div class="err-msg" id="password-error"></div>
+
+            <label for="confirm-password-input" class="sr-only">Confirm Password</label>
+            <div class="pw-wrapper">
+              <input id="confirm-password-input" class="form-field" type="password" placeholder="Confirm Password" autocomplete="new-password" />
+              <button type="button" class="pw-eye" id="cpw-toggle" aria-label="Toggle confirm password visibility">
+                <svg id="eye-open-2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="eye-closed-2" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+            <div class="err-msg" id="confirm-error"></div>
+
+            <button class="btn-primary" id="getStartedBtn" type="button">Get Started</button>
+
+            <p class="terms-text">
+              By signing up you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>
+            </p>
+          </div>
+        </div>
+
+        <!-- OTP PANEL -->
+        <div id="otpPanel" style="display:none;">
+          <h2 class="signup-heading">Verify your email</h2>
+          <div class="signup-fields" style="margin-top:10px;">
+            <p class="otp-sub">Enter the 6-digit code sent to <strong id="otp-email-display"></strong>.</p>
+            <div class="otp-boxes" id="otpBoxes">
+              <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+              <input class="otp-box" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-box" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-box" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-box" type="text" inputmode="numeric" maxlength="1" />
+              <input class="otp-box" type="text" inputmode="numeric" maxlength="1" />
+            </div>
+            <div class="otp-status" id="otpStatus"></div>
+            <button class="btn-primary" id="verifyBtn" type="button">Verify</button>
+            <div class="otp-resend">
+              Didn't get it? <button id="resendBtn" type="button" disabled>Resend</button>
+              <span id="resendTimer">(60s)</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="site-footer" aria-label="Site footer">
+      <span class="footer-left">© 2026 Audenta</span>
+      <div class="footer-socials">
+        <a href="https://www.linkedin.com" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><img src="img/icon-2.png" alt="LinkedIn" /></a>
+        <a href="https://www.youtube.com/@AudentaApp" class="social-link" aria-label="Youtube" target="_blank" rel="noopener noreferrer"><img src="img/image.png" alt="Youtube" /></a>
+        <a href="https://www.instagram.com/audenta.app/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><img src="img/icon.png" alt="Instagram" /></a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Suppress browser autofill UI overlays
+    const _pwStyle = document.createElement('style');
+    _pwStyle.textContent = [
+      'input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear{display:none!important}',
+      'input::-webkit-credentials-auto-fill-button{display:none!important;pointer-events:none!important;width:0!important;height:0!important}',
+      'input::-webkit-strong-password-auto-fill-button{display:none!important;pointer-events:none!important;width:0!important;height:0!important}',
+      'input::-webkit-textfield-decoration-container{display:none!important}',
+      'input::-webkit-contacts-auto-fill-button{display:none!important;pointer-events:none!important;width:0!important;height:0!important}',
+      'input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--bg,#111) inset!important;-webkit-text-fill-color:var(--text-1,#ddd)!important;transition:background-color 5000s ease-in-out 0s!important}'
+    ].join('');
+    document.head.appendChild(_pwStyle);
+
+    const API = window.AUDENTA_API || 'http://localhost:5000/api/auth';
+
+    function saveSession(token, user) {
+      // Write to BOTH sessionStorage (for this session) and localStorage
+      // (so storage.js fallback works after Tauri app restarts).
+      const userStr = JSON.stringify(user);
+      sessionStorage.setItem('audenta_token', token);
+      sessionStorage.setItem('audenta_user',  userStr);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user',  userStr);
+    }
+
+    // ── PASSWORD EYE TOGGLES ─────────────────────────────────────
+    function setupEyeToggle(inputId, toggleId, eyeOpenId, eyeClosedId) {
+      const input     = document.getElementById(inputId);
+      const toggle    = document.getElementById(toggleId);
+      const eyeOpen   = document.getElementById(eyeOpenId);
+      const eyeClosed = document.getElementById(eyeClosedId);
+      toggle.addEventListener('click', () => {
+        const show          = input.type === 'password';
+        input.type          = show ? 'text' : 'password';
+        eyeOpen.style.display   = show ? 'none' : '';
+        eyeClosed.style.display = show ? '' : 'none';
+      });
+    }
+    setupEyeToggle('password-input',         'pw-toggle',  'eye-open-1', 'eye-closed-1');
+    setupEyeToggle('confirm-password-input', 'cpw-toggle', 'eye-open-2', 'eye-closed-2');
+
+    // ── FORM ELEMENTS ────────────────────────────────────────────
+    const nameInput     = document.getElementById('name-input');
+    const emailInput    = document.getElementById('email-input');
+    const pwInput       = document.getElementById('password-input');
+    const cpwInput      = document.getElementById('confirm-password-input');
+    const getStartedBtn = document.getElementById('getStartedBtn');
+    const nameError     = document.getElementById('name-error');
+    const emailError    = document.getElementById('email-error');
+    const pwError       = document.getElementById('password-error');
+    const confirmError  = document.getElementById('confirm-error');
+
+    function showErr(input, el, msg) { input.classList.add('field-err'); el.textContent = msg; el.classList.add('show'); }
+    function clearErr(input, el)     { input.classList.remove('field-err'); el.textContent = ''; el.classList.remove('show'); }
+
+    [[nameInput, nameError],[emailInput, emailError],[pwInput, pwError],[cpwInput, confirmError]]
+      .forEach(([inp, err]) => inp.addEventListener('input', () => clearErr(inp, err)));
+
+    function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+    function validateForm() {
+      let ok = true;
+      if (!nameInput.value.trim())                     { showErr(nameInput,  nameError,    'Name is required');             ok = false; }
+      if (!emailInput.value.trim())                    { showErr(emailInput, emailError,   'Email is required');            ok = false; }
+      else if (!isValidEmail(emailInput.value.trim())) { showErr(emailInput, emailError,   'Invalid email format');         ok = false; }
+      if (!pwInput.value)                              { showErr(pwInput,    pwError,      'Password is required');         ok = false; }
+      else if (pwInput.value.length < 8)               { showErr(pwInput,    pwError,      'Minimum 8 characters');         ok = false; }
+      if (!cpwInput.value)                             { showErr(cpwInput,   confirmError, 'Please confirm your password'); ok = false; }
+      else if (pwInput.value !== cpwInput.value)       { showErr(cpwInput,   confirmError, 'Passwords do not match');       ok = false; }
+      return ok;
+    }
+
+    getStartedBtn.addEventListener('click', handleGetStarted);
+    [nameInput, emailInput, pwInput, cpwInput].forEach(inp =>
+      inp.addEventListener('keypress', e => { if (e.key === 'Enter') handleGetStarted(); })
+    );
+
+    async function handleGetStarted() {
+      if (!validateForm()) return;
+
+      getStartedBtn.disabled    = true;
+      getStartedBtn.textContent = 'Sending code…';
+
+      try {
+        const res  = await fetch(`${API}/signup`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name:     nameInput.value.trim(),
+            email:    emailInput.value.trim(),
+            password: pwInput.value
+          })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showErr(emailInput, emailError, data.error || 'Could not send code. Try again.');
+          getStartedBtn.disabled    = false;
+          getStartedBtn.textContent = 'Get Started';
+          return;
+        }
+
+        const email          = emailInput.value.trim();
+        const [user, domain] = email.split('@');
+        const masked         = user.slice(0, 1) + '***@' + domain;
+        document.getElementById('otp-email-display').textContent = masked;
+        document.getElementById('signupPanel').style.display = 'none';
+        document.getElementById('otpPanel').style.display    = 'block';
+        startResendTimer(60);
+        otpBoxes[0].focus();
+
+      } catch {
+        showErr(emailInput, emailError, 'Connection failed. Try again.');
+        getStartedBtn.disabled    = false;
+        getStartedBtn.textContent = 'Get Started';
+      }
+    }
+
+    // ── OTP ──────────────────────────────────────────────────────
+    const otpBoxes    = Array.from(document.querySelectorAll('.otp-box'));
+    const verifyBtn   = document.getElementById('verifyBtn');
+    const otpStatus   = document.getElementById('otpStatus');
+    const resendBtn   = document.getElementById('resendBtn');
+    const resendTimer = document.getElementById('resendTimer');
+    let resendInterval = null;
+    let isVerifying    = false;
+
+    otpBoxes.forEach((box, idx) => {
+      box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !box.value && idx > 0) otpBoxes[idx - 1].focus();
+      });
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/\D/g, '').slice(-1);
+        if (box.value && idx < 5) otpBoxes[idx + 1].focus();
+        if (otpBoxes.every(b => b.value)) verifyOTP();
+      });
+      box.addEventListener('paste', e => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        pasted.split('').forEach((ch, i) => { if (otpBoxes[i]) otpBoxes[i].value = ch; });
+        otpBoxes[Math.min(pasted.length, 5)].focus();
+        if (pasted.length === 6) setTimeout(() => verifyOTP(), 0);
+      });
+    });
+
+    verifyBtn.addEventListener('click', verifyOTP);
+
+    function setOTPError(msg) {
+      otpStatus.className   = 'otp-status';
+      otpStatus.textContent = msg;
+      otpBoxes.forEach(b => { b.classList.add('err'); setTimeout(() => b.classList.remove('err'), 400); });
+    }
+
+    async function verifyOTP() {
+      if (isVerifying) return;
+      const code = otpBoxes.map(b => b.value).join('');
+      if (code.length < 6) { setOTPError('Enter all 6 digits.'); return; }
+
+      isVerifying           = true;
+      verifyBtn.disabled    = true;
+      verifyBtn.textContent = 'Verifying…';
+      otpStatus.textContent = '';
+      otpBoxes.forEach(b => b.setAttribute('disabled', true));
+
+      try {
+        const res  = await fetch(`${API}/verify-otp`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailInput.value.trim().toLowerCase(), code })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setOTPError(data.error || 'Incorrect code. Try again.');
+          verifyBtn.disabled    = false;
+          verifyBtn.textContent = 'Verify';
+          otpBoxes.forEach(b => b.removeAttribute('disabled'));
+          isVerifying = false;
+          return;
+        }
+
+        saveSession(data.token, data.user);
+        otpStatus.className   = 'otp-status success';
+        otpStatus.textContent = '✓ Verified! Redirecting…';
+        setTimeout(() => { window.location.href = 'download.html'; }, 900);
+
+      } catch {
+        setOTPError('Connection failed. Try again.');
+        verifyBtn.disabled    = false;
+        verifyBtn.textContent = 'Verify';
+        otpBoxes.forEach(b => b.removeAttribute('disabled'));
+        isVerifying = false;
+      }
+    }
+
+    function startResendTimer(secs = 60) {
+      resendBtn.disabled = true;
+      let left = secs;
+      resendTimer.textContent = ` (${left}s)`;
+      clearInterval(resendInterval);
+      resendInterval = setInterval(() => {
+        left--;
+        resendTimer.textContent = left > 0 ? ` (${left}s)` : '';
+        if (left <= 0) { clearInterval(resendInterval); resendBtn.disabled = false; }
+      }, 1000);
+    }
+
+    resendBtn.addEventListener('click', async () => {
+      resendBtn.disabled    = true;
+      otpStatus.className   = 'otp-status';
+      otpStatus.textContent = 'Sending…';
+      otpBoxes.forEach(b => b.value = '');
+      otpBoxes[0].focus();
+      try {
+        const res = await fetch(`${API}/resend-otp`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailInput.value.trim() })
+        });
+        if (res.ok) {
+          otpStatus.textContent = 'A new code has been sent.';
+        } else {
+          const data            = await res.json();
+          otpStatus.style.color = 'var(--danger)';
+          otpStatus.textContent = data.error || 'Failed to resend.';
+        }
+        startResendTimer(60);
+      } catch {
+        otpStatus.style.color = 'var(--danger)';
+        otpStatus.textContent = 'Failed to resend. Check your connection.';
+        resendBtn.disabled    = false;
+      }
+    });
+
+    // ── DEMO CARD ─────────────────────────────────────────────────────────────
+    const DEMO_PILLAR_COLORS = { Health:'#4a7c5a', Career:'#4a6e9c', Wealth:'#ca8a04', Mindset:'#7c5a9c', Social:'#9c4a4a' };
+    const demoState = { tasks: [], activeTab: 'today', nextId: 1 };
+
+    function demoAddTask() {
+      const input    = document.getElementById('demoTaskInput');
+      const pillar   = document.getElementById('demoPillarSelect').value;
+      const priority = document.getElementById('demoPrioritySelect').value;
+      const text     = input.value.trim();
+      if (!text) return;
+      const slot = demoState.activeTab;
+      if (demoState.tasks.filter(t => t.slot === slot).length >= 8) return;
+      demoState.tasks.push({ id: demoState.nextId++, text, pillar, priority, completed: false, slot });
+      input.value = '';
+      demoRender();
+    }
+
+    function demoToggle(id) { const t = demoState.tasks.find(t => t.id === id); if (t && t.slot !== 'tomorrow') t.completed = !t.completed; demoRender(); }
+    function demoDelete(id) { demoState.tasks = demoState.tasks.filter(t => t.id !== id); demoRender(); }
+
+    function demoSwitchTab(tab) {
+      demoState.activeTab = tab;
+      document.getElementById('demoTabToday').classList.toggle('demo-tab--active',    tab === 'today');
+      document.getElementById('demoTabTomorrow').classList.toggle('demo-tab--active', tab === 'tomorrow');
+      demoRender();
+    }
+
+    const PRIO_ORDER = { high: 0, medium: 1, low: 2 };
+
+    function demoRender() {
+      const list  = document.getElementById('demoTodoList');
+      const tab   = demoState.activeTab;
+      const tasks = demoState.tasks.filter(t => t.slot === tab).sort((a, b) => {
+        if (tab === 'today' && a.completed !== b.completed) return a.completed ? 1 : -1;
+        return (PRIO_ORDER[a.priority] ?? 1) - (PRIO_ORDER[b.priority] ?? 1);
+      });
+
+      if (!tasks.length) {
+        list.innerHTML = '<div class="demo-empty-state">' + (tab === 'today' ? 'No tasks yet — add one above.' : 'No tasks planned for tomorrow.') + '</div>';
+        return;
+      }
+
+      list.innerHTML = tasks.map(task => {
+        const color     = task.pillar ? (DEMO_PILLAR_COLORS[task.pillar] || '#4a6e9c') : 'transparent';
+        const frozen    = task.slot === 'tomorrow';
+        const clickAttr = !frozen ? ' onclick="demoToggle(' + task.id + ')"' : '';
+        return '<div class="demo-todo-item' + (task.completed ? ' completed' : '') + '" style="border-left-color:' + color + ';">' +
+          '<div class="demo-todo-check' + (task.completed ? ' checked' : '') + '"' + clickAttr + ' role="checkbox" tabindex="0"></div>' +
+          '<div class="demo-todo-content"><span class="demo-todo-text">' + demoEsc(task.text) + '</span>' +
+          '<div class="demo-todo-meta"><span class="demo-todo-priority">' + task.priority + '</span>' +
+          (task.pillar ? '<span class="demo-todo-pillar">' + demoEsc(task.pillar) + '</span>' : '') +
+          '</div></div><button class="demo-todo-delete" onclick="demoDelete(' + task.id + ')">✕</button></div>';
+      }).join('');
+    }
+
+    function demoEsc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    document.getElementById('demoAddBtn').addEventListener('click', demoAddTask);
+    document.getElementById('demoTaskInput').addEventListener('keydown', e => { if (e.key === 'Enter') demoAddTask(); });
+    document.getElementById('demoTabToday').addEventListener('click',    () => demoSwitchTab('today'));
+    document.getElementById('demoTabTomorrow').addEventListener('click', () => demoSwitchTab('tomorrow'));
+  </script>
+</body>
+</html>

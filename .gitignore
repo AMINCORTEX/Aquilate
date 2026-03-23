@@ -1,0 +1,8 @@
+# Environment variables - NEVER upload this
+.env
+
+# Dependencies - too large, not needed on GitHub
+node_modules/
+
+# Tauri build output
+app/

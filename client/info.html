@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Audenta — How It Works</title>
+  <link rel="icon" type="image/png" href="img/Audenta.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    .audenta { height: 100vh; }
+
+    .hiw-scroll-area {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-2) transparent;
+    }
+    .hiw-scroll-area::-webkit-scrollbar { width: 4px; }
+    .hiw-scroll-area::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+    .hiw-inner {
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 64px;
+    }
+
+    /* ── HERO ── */
+    .hiw-hero {
+      padding: 72px 0 64px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hiw-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 28px;
+      display: block;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .hiw-hero h1 {
+      font-family: var(--font-body);
+      font-size: clamp(38px, 5vw, 62px);
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.06;
+      letter-spacing: -0.025em;
+      margin-bottom: 28px;
+      animation: fadeUp 0.4s 0.06s ease both;
+    }
+
+    .hiw-hero h1 em {
+      color: var(--text-3);
+    }
+
+    .hiw-positioning {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-2);
+      border-left: 2px solid var(--border-2);
+      padding-left: 18px;
+      line-height: 1.65;
+      max-width: 440px;
+      animation: fadeUp 0.4s 0.12s ease both;
+    }
+
+    .hiw-concept-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 48px;
+      animation: fadeUp 0.4s 0.18s ease both;
+    }
+
+    .hiw-concept-node {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-4);
+    }
+
+    .hiw-concept-node--relief { color: var(--accent); }
+
+    .hiw-concept-arrow {
+      font-size: 11px;
+      color: var(--border-2);
+    }
+
+    /* ── BODY ── */
+    .hiw-body-content {
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 64px 80px;
+    }
+
+    .hiw-section { padding: 64px 0; }
+
+    .hiw-section h2 {
+      font-family: var(--font-body);
+      font-size: clamp(22px, 2.4vw, 30px);
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    .hiw-body {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-2);
+      line-height: 1.8;
+    }
+
+    .hiw-body p + p { margin-top: 12px; }
+    .hiw-body strong { color: var(--text-1); font-weight: 500; }
+
+    .hiw-callout {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-2);
+      padding: 20px 22px;
+      margin-top: 24px;
+    }
+
+    .hiw-callout-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+
+    .hiw-callout-list li {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-2);
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .hiw-callout-list li::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 8px;
+    }
+
+    /* ── LOOP STEPS ── */
+    .hiw-loop { display: flex; flex-direction: column; margin-top: 32px; }
+
+    .hiw-loop-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      position: relative;
+    }
+
+    .hiw-loop-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 34px;
+      width: 1px;
+      height: calc(100% - 8px);
+      background: var(--border);
+    }
+
+    .hiw-step-num {
+      width: 30px;
+      height: 30px;
+      background: var(--bg-3);
+      border: 1px solid var(--border-2);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .hiw-step-body { padding-bottom: 36px; flex: 1; }
+    .hiw-loop-step:last-child .hiw-step-body { padding-bottom: 0; }
+
+    .hiw-step-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-1);
+      margin-bottom: 4px;
+      margin-top: 5px;
+    }
+
+    .hiw-step-desc {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-2);
+      line-height: 1.7;
+    }
+
+    .hiw-result-quote {
+      margin-top: 28px;
+      border-top: 1px solid var(--border);
+      padding-top: 28px;
+    }
+
+    .hiw-result-quote p {
+      font-family: var(--font-body);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.4;
+    }
+
+    .hiw-result-quote p + p {
+      margin-top: 4px;
+      color: var(--text-3);
+    }
+
+    .hiw-rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="audenta">
+
+    <header class="site-header" role="banner">
+      <a href="home.html" class="logo-link" aria-label="Audenta Home">
+        <img class="audenta-icon" src="img/audenta-icon.png" alt="" />
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="home.html">Home</a>
+        <a href="contact.html">Contact</a>
+        <a href="info.html" class="nav-active">How it works</a>
+        <a href="features.html">Features</a>
+        <a href="download.html" class="btn-download">Download</a>
+      </nav>
+    </header>
+
+    <div class="hiw-scroll-area">
+
+      <section class="hiw-hero hiw-inner" aria-label="Introduction">
+        <span class="hiw-eyebrow">How it works</span>
+        <h1>The mechanism<br><em>behind Audenta.</em></h1>
+        <p class="hiw-positioning">
+          Audenta is designed for people who want accountability, not motivation.
+        </p>
+        <div class="hiw-concept-bar" aria-label="Core cycle">
+          <span class="hiw-concept-node">Pressure</span>
+          <span class="hiw-concept-arrow">→</span>
+          <span class="hiw-concept-node">Action</span>
+          <span class="hiw-concept-arrow">→</span>
+          <span class="hiw-concept-node hiw-concept-node--relief">Relief</span>
+        </div>
+      </section>
+
+      <div class="hiw-body-content">
+
+        <section class="hiw-section" aria-labelledby="hiw-problem">
+          <p class="section-label">01 &nbsp; The problem</p>
+          <h2 id="hiw-problem">Most systems fail for a simple reason:<br>they remove pressure.</h2>
+          <div class="hiw-body">
+            <p>Tasks sit quietly in lists. Nothing pushes you to act. Nothing happens if you avoid them.</p>
+            <p><strong>People avoid friction. Most systems remove it.</strong></p>
+            <p>So the list grows. The days pass. The work stays undone — not because you can't, but because the system made it comfortable not to.</p>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
+        <section class="hiw-section" aria-labelledby="hiw-mechanism">
+          <p class="section-label">02 &nbsp; The Audenta mechanism</p>
+          <h2 id="hiw-mechanism">Controlled psychological pressure.</h2>
+          <div class="hiw-body">
+            <p>Tasks are not passive items in a list. They exist inside a system that works against avoidance.</p>
+          </div>
+          <div class="hiw-callout">
+            <ul class="hiw-callout-list">
+              <li>Exposes avoidance in real time</li>
+              <li>Demands a decision — complete it, defer it, or confront why you haven't</li>
+              <li>Rewards completion with genuine relief, not a badge</li>
+            </ul>
+          </div>
+          <div class="hiw-body" style="margin-top: 20px;">
+            <p>You either move forward, or you confront the fact that you didn't. <strong>That tension is intentional.</strong></p>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
+        <section class="hiw-section" aria-labelledby="hiw-loop">
+          <p class="section-label">03 &nbsp; The action loop</p>
+          <h2 id="hiw-loop">Four steps. No shortcuts.</h2>
+
+          <div class="hiw-loop">
+            <div class="hiw-loop-step">
+              <div class="hiw-step-num">1</div>
+              <div class="hiw-step-body">
+                <p class="hiw-step-title">Define</p>
+                <p class="hiw-step-desc">You set a clear action that matters — not a vague intention but a specific commitment.</p>
+              </div>
+            </div>
+            <div class="hiw-loop-step">
+              <div class="hiw-step-num">2</div>
+              <div class="hiw-step-body">
+                <p class="hiw-step-title">Confront</p>
+                <p class="hiw-step-desc">The system surfaces the task again and again until it is handled. Avoidance becomes visible.</p>
+              </div>
+            </div>
+            <div class="hiw-loop-step">
+              <div class="hiw-step-num">3</div>
+              <div class="hiw-step-body">
+                <p class="hiw-step-title">Execute</p>
+                <p class="hiw-step-desc">You complete the task. No tricks. Just the weight of what you said you'd do.</p>
+              </div>
+            </div>
+            <div class="hiw-loop-step">
+              <div class="hiw-step-num">4</div>
+              <div class="hiw-step-body">
+                <p class="hiw-step-title">Release</p>
+                <p class="hiw-step-desc">The pressure disappears. Completion restores clarity and momentum. The loop resets.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
+        <section class="hiw-section" aria-labelledby="hiw-result">
+          <p class="section-label">04 &nbsp; The result</p>
+          <h2 id="hiw-result">Discipline becomes default.</h2>
+          <div class="hiw-body">
+            <p>Audenta does not try to motivate you. It creates an environment where avoidance becomes uncomfortable and action becomes the relief.</p>
+            <p>Over time, consistency stops relying on willpower. It becomes structural.</p>
+          </div>
+          <div class="hiw-result-quote">
+            <p>Discipline stops being a decision.</p>
+            <p>It becomes the default.</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <footer class="site-footer" aria-label="Site footer">
+      <span class="footer-left">© 2026 Audenta</span>
+      <div class="footer-socials">
+        <a href="https://www.linkedin.com" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><img src="img/icon-2.png" alt="LinkedIn" /></a>
+                <a href="https://www.youtube.com/@AudentaApp" class="social-link" aria-label="Youtube" target="_blank" rel="noopener noreferrer">
+          <img src="img/image.png" alt="Youtube" />
+        </a>
+        <a href="https://www.instagram.com/audenta.app/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><img src="img/icon.png" alt="Instagram" /></a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

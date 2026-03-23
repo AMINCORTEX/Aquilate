@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Audenta — Download</title>
+  <link rel="icon" type="image/png" href="img/Audenta.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    .audenta { height: 100vh; }
+
+    .download-layout {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 52px;
+      min-height: 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    .download-container {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .dl-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 20px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .dl-headline {
+      font-family: var(--font-body);
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 400;
+      color: var(--text-1);
+      line-height: 1.06; letter-spacing: -0.025em;
+      margin-bottom: 12px;
+      animation: fadeUp 0.4s 0.06s ease both;
+    }
+
+    .dl-subhead {
+      font-size: 14px; font-weight: 400;
+      color: var(--text-3); margin-bottom: 36px;
+      animation: fadeUp 0.4s 0.12s ease both;
+    }
+
+    .download-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 16px;
+      width: 100%;
+      animation: fadeUp 0.4s 0.18s ease both;
+    }
+
+    .download-btn {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      color: var(--text-1);
+      font-size: 13px; font-weight: 500;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 152px;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: var(--font-body);
+    }
+
+    .download-btn:hover {
+      background: var(--bg-3);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .download-btn svg {
+      width: 14px; height: 14px;
+      fill: none; stroke: currentColor;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .secondary-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 28px;
+      font-size: 12px;
+      animation: fadeUp 0.4s 0.24s ease both;
+    }
+
+    .secondary-links a {
+      color: var(--text-3);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    .secondary-links a:hover { color: var(--text-1); }
+
+    .version-info {
+      font-family: var(--font-mono);
+      font-size: 10px; color: var(--text-4);
+      display: flex; gap: 20px;
+      justify-content: center;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+      margin-top: 4px;
+      animation: fadeUp 0.4s 0.3s ease both;
+    }
+
+    .version-info span { display: flex; align-items: center; gap: 4px; }
+  </style>
+</head>
+<body>
+  <div class="audenta">
+
+    <header class="site-header" role="banner">
+      <a href="home.html" class="logo-link" aria-label="Audenta Home">
+        <img class="audenta-icon" src="img/audenta-icon.png" alt="" />
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="home.html">Home</a>
+        <a href="contact.html">Contact</a>
+        <a href="info.html">How it works</a>
+        <a href="features.html">Features</a>
+        <a href="download.html" class="btn-download active">Download</a>
+      </nav>
+    </header>
+
+    <main class="download-layout">
+
+      <div class="download-container">
+        <span class="dl-eyebrow">Available now</span>
+        <h1 class="dl-headline">Download Audenta</h1>
+        <p class="dl-subhead">A discipline system for structured personal progress.</p>
+
+        <div class="download-buttons">
+          <a href="#" class="download-btn" download>
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/>
+              <rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/>
+            </svg>
+            Windows
+          </a>
+          <a href="#" class="download-btn" download>
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+              <path d="M12 6a6 6 0 1 0 6 6A6 6 0 0 0 12 6z"/>
+            </svg>
+            macOS
+          </a>
+          <a href="#" class="download-btn" download>
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+            Linux
+          </a>
+        </div>
+
+        <div class="secondary-links">
+          <a href="#">Web Version</a>
+          <a href="#">Release Notes</a>
+          <a href="#">System Requirements</a>
+        </div>
+
+        <div class="version-info">
+          <span>v2.1.4</span>
+          <span>March 2026</span>
+          <span>84 MB</span>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer" aria-label="Site footer">
+      <span class="footer-left">© 2026 Audenta</span>
+      <div class="footer-socials">
+        <a href="https://www.linkedin.com" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><img src="img/icon-2.png" alt="LinkedIn" /></a>
+                <a href="https://www.youtube.com/@AudentaApp" class="social-link" aria-label="Youtube" target="_blank" rel="noopener noreferrer">
+          <img src="img/image.png" alt="Youtube" />
+        </a>
+        <a href="https://www.instagram.com/audenta.app/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><img src="img/icon.png" alt="Instagram" /></a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

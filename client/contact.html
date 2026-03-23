@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Audenta — Contact</title>
+  <link rel="icon" type="image/png" href="img/Audenta.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    .audenta { height: 100vh; }
+
+    .contact-layout {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 52px;
+      min-height: 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    .contact-card {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .contact-header { display: flex; flex-direction: column; gap: 6px; }
+
+    .contact-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .contact-title {
+      font-family: var(--font-body);
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 400;
+      color: var(--text-1); line-height: 1.15;
+    }
+
+    .contact-subtitle {
+      font-size: 13px; font-weight: 400;
+      color: var(--text-3); line-height: 1.5;
+    }
+
+    .contact-divider { height: 1px; background: var(--border); }
+
+    .contact-form { display: flex; flex-direction: column; gap: 9px; }
+
+    .contact-form select.form-field {
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%235a6370' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      padding-right: 32px; cursor: pointer; color: var(--text-3);
+    }
+
+    .contact-form select.form-field.selected { color: var(--text-1); }
+
+    .contact-form textarea.form-field {
+      height: 88px; resize: none; padding: 10px 12px; line-height: 1.6;
+    }
+
+    .field-error {
+      font-size: 10px; color: var(--danger);
+      margin-top: 2px; padding-left: 2px; line-height: 1.4;
+      display: none;
+    }
+
+    .field-error.visible { display: block; }
+
+    .form-status {
+      font-size: 12px; font-weight: 400;
+      padding: 10px 14px; border-radius: var(--radius);
+      display: none; line-height: 1.5;
+    }
+
+    .form-status.success {
+      display: block;
+      background: rgba(74,140,92,0.08);
+      color: #6bbc8a;
+      border: 1px solid rgba(74,140,92,0.2);
+    }
+
+    .form-status.error {
+      display: block;
+      background: rgba(196,92,60,0.08);
+      color: var(--danger);
+      border: 1px solid rgba(196,92,60,0.2);
+    }
+
+    .contact-meta { display: flex; flex-direction: column; gap: 12px; }
+
+    .contact-email-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .contact-email-label { font-size: 12px; font-weight: 400; color: var(--text-3); }
+
+    .contact-email-link {
+      font-family: var(--font-mono);
+      font-size: 11px; font-weight: 500;
+      color: var(--accent);
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+
+    .contact-email-link:hover { color: var(--accent-2); }
+
+    .contact-response { font-size: 11px; color: var(--text-4); }
+
+    .contact-philosophy {
+      font-size: 11px; font-weight: 400;
+      color: var(--text-4); line-height: 1.65;
+      padding-top: 4px; border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="audenta">
+
+    <header class="site-header" role="banner">
+      <a href="home.html" class="logo-link" aria-label="Audenta Home">
+        <img class="audenta-icon" src="img/audenta-icon.png" alt="" />
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="home.html">Home</a>
+        <a href="contact.html" class="nav-active">Contact</a>
+        <a href="info.html">How it works</a>
+        <a href="features.html">Features</a>
+        <a href="download.html" class="btn-download">Download</a>
+      </nav>
+    </header>
+
+    <main class="contact-layout">
+      <div class="contact-card">
+
+        <div class="contact-header">
+          <span class="contact-eyebrow">Get in touch</span>
+          <h1 class="contact-title">Contact</h1>
+          <p class="contact-subtitle">Questions, issues, or serious feedback about Audenta.</p>
+        </div>
+
+        <div class="contact-divider"></div>
+
+        <form class="contact-form" id="contactForm" novalidate>
+
+          <select class="form-field" id="category" aria-label="Category" required>
+            <option value="" disabled selected>Category</option>
+            <option value="account">Account issue</option>
+            <option value="bug">Bug report</option>
+            <option value="feedback">Feedback</option>
+            <option value="business">Business / partnership</option>
+          </select>
+
+          <input class="form-field" type="email" id="email" placeholder="Email" autocomplete="email" required />
+          <p class="field-error" id="emailError"></p>
+
+          <textarea class="form-field" id="message" placeholder="Message" required></textarea>
+
+          <div class="form-status" id="formStatus" role="alert"></div>
+
+          <button type="submit" class="btn-primary" id="submitBtn" disabled>Send message</button>
+
+        </form>
+
+        <div class="contact-divider"></div>
+
+        <div class="contact-meta">
+          <div class="contact-email-row">
+            <span class="contact-email-label">Prefer email directly?</span>
+            <span class="contact-email-link">audenta.app@gmail.com</span>
+          </div>
+          <p class="contact-response">Responses within 24–48 hours.</p>
+        </div>
+
+        <p class="contact-philosophy">
+          Audenta is intentionally minimal. Please keep messages focused and relevant.
+        </p>
+
+      </div>
+    </main>
+
+    <footer class="site-footer" aria-label="Site footer">
+      <span class="footer-left">© 2026 Audenta</span>
+      <div class="footer-socials">
+        <a href="https://www.linkedin.com" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><img src="img/icon-2.png" alt="LinkedIn" /></a>
+                <a href="https://www.youtube.com/@AudentaApp" class="social-link" aria-label="Youtube" target="_blank" rel="noopener noreferrer">
+          <img src="img/image.png" alt="Youtube" />
+        </a>
+        <a href="https://www.instagram.com/audenta.app/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><img src="img/icon.png" alt="Instagram" /></a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    const API = window.AUDENTA_API || 'http://localhost:5000/api';
+    const categoryEl = document.getElementById('category');
+    const emailEl    = document.getElementById('email');
+    const messageEl  = document.getElementById('message');
+    const submitBtn  = document.getElementById('submitBtn');
+    const emailError = document.getElementById('emailError');
+    const formStatus = document.getElementById('formStatus');
+
+    function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
+
+    function showEmailError(msg) {
+      emailEl.classList.add('field-err');
+      emailError.textContent = msg;
+      emailError.classList.add('visible');
+    }
+
+    function clearEmailError() {
+      emailEl.classList.remove('field-err');
+      emailError.textContent = '';
+      emailError.classList.remove('visible');
+    }
+
+    function showStatus(msg, type) {
+      formStatus.textContent = msg;
+      formStatus.className = `form-status ${type}`;
+    }
+
+    function hideStatus() {
+      formStatus.className = 'form-status';
+      formStatus.textContent = '';
+    }
+
+    function evaluate() {
+      submitBtn.disabled = !(categoryEl.value && isValidEmail(emailEl.value) && messageEl.value.trim().length > 0);
+    }
+
+    emailEl.addEventListener('input', () => { clearEmailError(); hideStatus(); evaluate(); });
+    categoryEl.addEventListener('change', () => {
+      categoryEl.classList.toggle('selected', categoryEl.value !== '');
+      hideStatus(); evaluate();
+    });
+    messageEl.addEventListener('input', () => { hideStatus(); evaluate(); });
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (submitBtn.disabled) return;
+      clearEmailError(); hideStatus();
+
+      const category = categoryEl.value;
+      const email    = emailEl.value.trim();
+      const message  = messageEl.value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      try {
+        const res  = await fetch(`${API}/contact/send`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, category, message })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showStatus(data.message || "Message sent. We'll reply within 24–48 hours.", 'success');
+          categoryEl.value = ''; categoryEl.classList.remove('selected');
+          emailEl.value = ''; messageEl.value = '';
+          clearEmailError();
+        } else {
+          if (res.status === 404 || res.status === 403) showEmailError(data.error);
+          else showStatus(data.error || 'Failed to send. Please try again.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send message';
+                  }
+      } catch {
+        showStatus('Connection failed. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send message';
+      }
+    });
+  </script>
+</body>
+</html>

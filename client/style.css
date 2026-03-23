@@ -1,0 +1,245 @@
+/* ─── RESET ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+html, body { height: 100%; width: 100%; }
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+img { display: block; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid #4c6fb3; outline-offset: 2px;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ─── DESIGN TOKENS ──────────────────────────────────── */
+:root {
+  /* Dark surface scale — neutral, no blue tint */
+  --bg:         #0a0a08;
+  --bg-2:       #141414;
+  --bg-3:       #1c1c1c;
+  --bg-4:       #242424;
+
+  /* Borders */
+  --border:     #252525;
+  --border-2:   #303030;
+
+  /* Text scale */
+  --text-1:     #efefef;
+  --text-2:     #8c8c8c;
+  --text-3:     #555555;
+  --text-4:     #303030;
+
+  /* Brand accent — muted desaturated blue */
+  --accent:     #4c6fb3;
+  --accent-2:   #3d5fa3;
+  --accent-dim: rgba(76,111,179,0.14);
+
+  /* Status */
+  --danger:     #c0392b;
+  --success:    #27ae60;
+
+  /* Geometry */
+  --radius:     6px;
+  --radius-2:   10px;
+
+  /* Shadows */
+  --shadow:     0 1px 3px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg:  0 2px 8px rgba(0,0,0,0.6), 0 16px 40px rgba(0,0,0,0.4);
+
+  /* Typography */
+  --font-body:  'Inter', Helvetica, Arial, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
+}
+
+/* ─── SHELL ──────────────────────────────────────────── */
+.audenta {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--text-1);
+}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+.site-header {
+  position: relative; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 52px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.logo-link { display: flex; align-items: center; gap: 10px; }
+.audenta-icon { height: 20px; width: auto; object-fit: contain; }
+
+.logo-text {
+  font-family: var(--font-body); font-size: 15px; font-weight: 600;
+  color: var(--text-1); letter-spacing: -0.01em;
+}
+
+.main-nav { display: flex; align-items: center; gap: 28px; }
+
+.main-nav a {
+  font-size: 13px; font-weight: 400; color: var(--text-2);
+  letter-spacing: 0.01em; transition: color 0.2s ease; position: relative;
+}
+
+.main-nav a:hover { color: var(--text-1); }
+.main-nav .nav-active { color: var(--text-1); font-weight: 500; }
+
+.main-nav .nav-active::after {
+  content: ''; position: absolute;
+  bottom: -3px; left: 0; right: 0;
+  height: 1px; background: var(--accent);
+}
+
+/* Download button — neutral by default, accent only on hover/active */
+.btn-download {
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  color: var(--text-2) !important;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 18px; border-radius: var(--radius);
+  white-space: nowrap; transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.btn-download:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff !important;
+}
+
+/* On download.html the button is active — keep accent fill, no shadow */
+.btn-download.active, .btn-download.nav-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff !important;
+  box-shadow: none;
+}
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+/* Continuation of the dark surface — no flat gray block */
+.site-footer {
+  position: relative; z-index: 10; flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 52px;
+}
+
+.footer-left { font-size: 11px; color: var(--text-3); letter-spacing: 0.03em; font-family: var(--font-mono); }
+.footer-socials { display: flex; align-items: center; gap: 8px; }
+
+.social-link {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius); transition: border-color 0.2s ease;
+}
+
+.social-link:hover { border-color: var(--border-2); }
+.social-link img { width: 13px; height: 13px; object-fit: contain; filter: brightness(0.45); }
+.social-link:hover img { filter: brightness(0.7); }
+
+/* ─── FORM ELEMENTS ──────────────────────────────────── */
+.form-field {
+  width: 100%; height: 40px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0 12px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 400;
+  color: var(--text-1);
+  transition: border-color 0.2s ease;
+  outline: none; -webkit-appearance: none;
+}
+
+.form-field::placeholder { color: var(--text-4); }
+.form-field:focus { border-color: var(--accent); }
+.form-field.field-err { border-color: var(--danger); }
+
+.err-msg {
+  font-size: 11px; color: var(--danger);
+  overflow: hidden; max-height: 0; opacity: 0;
+  transition: max-height 0.15s, opacity 0.15s; margin-top: -2px;
+}
+.err-msg.show { max-height: 20px; opacity: 1; }
+
+.btn-primary {
+  width: 100%; height: 42px;
+  background: var(--accent); color: #ffffff;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  border-radius: var(--radius); letter-spacing: 0.01em;
+  transition: background 0.2s ease; border: none;
+}
+
+.btn-primary:hover:not(:disabled) { background: var(--accent-2); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ─── SCROLL AREA ────────────────────────────────────── */
+.scroll-area {
+  position: relative; z-index: 5;
+  flex: 1; overflow-y: auto; min-height: 0;
+  scrollbar-width: thin; scrollbar-color: var(--border-2) transparent;
+}
+.scroll-area::-webkit-scrollbar { width: 4px; }
+.scroll-area::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+/* ─── SECTION LABEL ──────────────────────────────────── */
+.section-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3);
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ─── DIVIDER ────────────────────────────────────────── */
+.rule { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+/* ─── PASSWORD EYE ───────────────────────────────────── */
+.pw-wrapper { position: relative; display: flex; align-items: center; }
+.pw-wrapper .form-field { padding-right: 36px; }
+.pw-eye {
+  position: absolute; right: 10px; background: none; border: none;
+  padding: 0; color: var(--text-3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: color 0.2s;
+}
+.pw-eye:hover { color: var(--text-1); }
+.pw-eye svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── OTP ────────────────────────────────────────────── */
+.otp-sub { font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 4px; }
+.otp-sub strong { color: var(--text-1); font-weight: 500; }
+.otp-boxes { display: flex; gap: 6px; width: 100%; }
+.otp-box {
+  flex: 1; min-width: 0; height: 44px; text-align: center;
+  font-size: 18px; font-weight: 600; color: var(--text-1);
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); outline: none;
+  font-family: var(--font-mono); transition: border-color 0.2s; caret-color: transparent;
+}
+.otp-box:focus { border-color: var(--accent); }
+.otp-box.err { border-color: var(--danger); animation: shake 0.32s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)} }
+.otp-status { font-size: 11px; color: var(--danger); min-height: 16px; }
+.otp-status.success { color: var(--success); }
+.otp-resend { font-size: 11px; color: var(--text-3); }
+.otp-resend button { color: var(--text-2); font-size: 11px; font-family: inherit; font-weight: 500; text-decoration: underline; text-underline-offset: 2px; }
+.otp-resend button:disabled { color: var(--text-4); text-decoration: none; cursor: default; }
+
+/* ─── TERMS ──────────────────────────────────────────── */
+.terms-text { font-size: 10px; font-weight: 400; color: var(--text-3); text-align: center; line-height: 1.6; }
+.terms-text a { color: var(--text-2); text-decoration: underline; text-underline-offset: 2px; }
+.terms-text a:hover { color: var(--text-1); }
+
+/* ─── PAGE LOAD ANIMATION ────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.45s ease both; }
+.fade-up-1 { animation-delay: 0.05s; }
+.fade-up-2 { animation-delay: 0.12s; }
+.fade-up-3 { animation-delay: 0.2s; }
+.fade-up-4 { animation-delay: 0.28s; }
+.fade-up-5 { animation-delay: 0.36s; }
