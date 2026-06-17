@@ -3,341 +3,156 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
-  <title>Audenta — How It Works</title>
-  <link rel="icon" type="image/png" href="img/Audenta.png">
+  <title>Aquilate — How It Works</title>
+  <link rel="icon" href="imgs/logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
   <style>
-    html, body { height: 100%; overflow: hidden; }
-    .audenta { height: 100vh; }
+    .hiw-scroll-area { display: flex; flex-direction: column; width: 100%; }
+    .hiw-inner { max-width: 760px; width: 100%; margin: 0 auto; padding: 0 2rem; }
 
-    .hiw-scroll-area {
-      position: relative;
-      z-index: 5;
-      flex: 1;
-      overflow-y: auto;
-      min-height: 0;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border-2) transparent;
-    }
-    .hiw-scroll-area::-webkit-scrollbar { width: 4px; }
-    .hiw-scroll-area::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
-
-    .hiw-inner {
-      max-width: 860px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 0 64px;
-    }
-
-    /* ── HERO ── */
-    .hiw-hero {
-      padding: 72px 0 64px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .hiw-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 28px;
-      display: block;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .hiw-hero h1 {
-      font-family: var(--font-body);
-      font-size: clamp(38px, 5vw, 62px);
-      font-weight: 400;
-      color: var(--text-1);
-      line-height: 1.06;
-      letter-spacing: -0.025em;
-      margin-bottom: 28px;
-      animation: fadeUp 0.4s 0.06s ease both;
-    }
-
-    .hiw-hero h1 em {
-      color: var(--text-3);
-    }
-
-    .hiw-positioning {
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--text-2);
-      border-left: 2px solid var(--border-2);
-      padding-left: 18px;
-      line-height: 1.65;
-      max-width: 440px;
-      animation: fadeUp 0.4s 0.12s ease both;
-    }
-
-    .hiw-concept-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 48px;
-      animation: fadeUp 0.4s 0.18s ease both;
-    }
-
-    .hiw-concept-node {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-4);
-    }
-
+    /* ─── HERO ─── */
+    .hiw-hero { padding: 5rem 2rem 4rem; text-align: left; animation: fadeUp 0.4s ease both; }
+    .hiw-eyebrow { font-family: var(--font-mono); font-size: 0.687rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 1.5rem; display: block; }
+    .hiw-hero h1 { font-size: clamp(2.05rem, 5vw, 3.5rem); font-weight: 400; color: var(--text-1); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+    .hiw-hero h1 em { color: var(--text-3); font-style: normal; }
+    .hiw-positioning { font-size: 1.05rem; color: var(--text-2); border-left: 2px solid var(--accent); padding-left: 1.25rem; line-height: 1.6; max-width: 520px; }
+    
+    .hiw-concept-bar { display: flex; align-items: center; gap: 12px; margin-top: 3rem; background: var(--bg-2); padding: 0.75rem 1.25rem; border-radius: var(--radius); width: fit-content; border: 1px solid var(--border); box-shadow: var(--shadow); flex-wrap: wrap; }
+    .hiw-concept-node { font-family: var(--font-mono); font-size: 0.687rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); }
     .hiw-concept-node--relief { color: var(--accent); }
+    .hiw-concept-arrow { font-size: 0.75rem; color: var(--text-4); }
 
-    .hiw-concept-arrow {
-      font-size: 11px;
-      color: var(--border-2);
-    }
-
-    /* ── BODY ── */
-    .hiw-body-content {
-      max-width: 860px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 0 64px 80px;
-    }
-
-    .hiw-section { padding: 64px 0; }
-
-    .hiw-section h2 {
-      font-family: var(--font-body);
-      font-size: clamp(22px, 2.4vw, 30px);
-      font-weight: 400;
-      color: var(--text-1);
-      line-height: 1.25;
-      margin-bottom: 20px;
-    }
-
-    .hiw-body {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-2);
-      line-height: 1.8;
-    }
-
-    .hiw-body p + p { margin-top: 12px; }
+    /* ─── BODY CONTENT ─── */
+    .hiw-body-content { padding-bottom: 5rem; }
+    .hiw-section { padding: 4.5rem 0; }
+    .hiw-section h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 400; color: var(--text-1); line-height: 1.2; margin-bottom: 1.5rem; letter-spacing: -0.01em; }
+    .hiw-body { font-size: 0.937rem; color: var(--text-2); line-height: 1.75; }
+    .hiw-body p + p { margin-top: 1rem; }
     .hiw-body strong { color: var(--text-1); font-weight: 500; }
 
-    .hiw-callout {
-      background: var(--bg-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-2);
-      padding: 20px 22px;
-      margin-top: 24px;
-    }
+    .hiw-callout { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-2); padding: 1.5rem; margin-top: 2rem; box-shadow: var(--shadow); }
+    .hiw-callout-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+    .hiw-callout-list li { font-size: 0.875rem; color: var(--text-2); display: flex; align-items: flex-start; gap: 12px; line-height: 1.4; }
+    .hiw-callout-list li::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
 
-    .hiw-callout-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-
-    .hiw-callout-list li {
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--text-2);
-      line-height: 1.6;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .hiw-callout-list li::before {
-      content: '';
-      width: 5px;
-      height: 5px;
-      background: var(--accent);
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 8px;
-    }
-
-    /* ── LOOP STEPS ── */
-    .hiw-loop { display: flex; flex-direction: column; margin-top: 32px; }
-
-    .hiw-loop-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-      position: relative;
-    }
-
-    .hiw-loop-step:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      left: 15px;
-      top: 34px;
-      width: 1px;
-      height: calc(100% - 8px);
-      background: var(--border);
-    }
-
-    .hiw-step-num {
-      width: 30px;
-      height: 30px;
-      background: var(--bg-3);
-      border: 1px solid var(--border-2);
-      color: var(--accent);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 500;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      z-index: 1;
-    }
-
-    .hiw-step-body { padding-bottom: 36px; flex: 1; }
+    /* ─── LOOP STEPS ─── */
+    .hiw-loop { display: flex; flex-direction: column; margin-top: 2.5rem; gap: 0; }
+    .hiw-loop-step { display: flex; gap: 1.5rem; position: relative; }
+    .hiw-loop-step:not(:last-child)::after { content: ''; position: absolute; left: 16px; top: 32px; width: 1px; height: calc(100% - 24px); background: var(--border-2); }
+    .hiw-step-num { width: 32px; height: 32px; background: var(--bg-2); border: 1px solid var(--border-2); color: var(--text-1); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1; box-shadow: var(--shadow); }
+    .hiw-step-body { padding-bottom: 2.5rem; flex: 1; min-width: 0; }
     .hiw-loop-step:last-child .hiw-step-body { padding-bottom: 0; }
+    .hiw-step-title { font-size: 1rem; font-weight: 500; color: var(--text-1); margin-bottom: 4px; }
+    .hiw-step-desc { font-size: 0.875rem; color: var(--text-2); line-height: 1.6; }
 
-    .hiw-step-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-1);
-      margin-bottom: 4px;
-      margin-top: 5px;
-    }
+    /* ─── RESULT QUOTE ─── */
+    .hiw-result-quote { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2.5rem; }
+    .hiw-result-quote p { font-size: clamp(1.25rem, 3vw, 1.5rem); font-weight: 400; color: var(--text-1); line-height: 1.4; letter-spacing: -0.01em; }
+    .hiw-result-quote p + p { margin-top: 6px; color: var(--text-3); font-size: clamp(1rem, 2vw, 1.125rem); }
 
-    .hiw-step-desc {
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--text-2);
-      line-height: 1.7;
-    }
-
-    .hiw-result-quote {
-      margin-top: 28px;
-      border-top: 1px solid var(--border);
-      padding-top: 28px;
-    }
-
-    .hiw-result-quote p {
-      font-family: var(--font-body);
-      font-size: 22px;
-      font-weight: 400;
-      color: var(--text-1);
-      line-height: 1.4;
-    }
-
-    .hiw-result-quote p + p {
-      margin-top: 4px;
-      color: var(--text-3);
-    }
-
-    .hiw-rule {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0;
+    @media (max-width: 640px) {
+      .hiw-inner { padding: 0 1rem; }
+      .hiw-hero { padding: 3rem 1rem 2rem; }
+      .hiw-section { padding: 2.5rem 0; }
+      .hiw-concept-bar { margin-top: 2rem; width: 100%; justify-content: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="audenta">
-
+  <div class="addit">
     <header class="site-header" role="banner">
-      <a href="home.html" class="logo-link" aria-label="Audenta Home">
-        <img class="audenta-icon" src="img/audenta-icon.png" alt="" />
+      <a href="home.html" class="logo-link" aria-label="Aquilate Home">
+        <span class="addit-wordmark">Aquilate</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
         <a href="home.html">Home</a>
-        <a href="contact.html">Contact</a>
         <a href="info.html" class="nav-active">How it works</a>
-        <a href="features.html">Features</a>
         <a href="download.html" class="btn-download">Download</a>
       </nav>
     </header>
 
     <div class="hiw-scroll-area">
-
       <section class="hiw-hero hiw-inner" aria-label="Introduction">
         <span class="hiw-eyebrow">How it works</span>
-        <h1>The mechanism<br><em>behind Audenta.</em></h1>
+        <h1>The mechanic<br><em>behind Aquilate.</em></h1>
         <p class="hiw-positioning">
-          Audenta is designed for people who want accountability, not motivation.
+          Aquilate is designed for people who want to control money before they spend it, not analyze it after.
         </p>
-        <div class="hiw-concept-bar" aria-label="Core cycle">
-          <span class="hiw-concept-node">Pressure</span>
+        <div class="hiw-concept-bar" aria-label="Core loop">
+          <span class="hiw-concept-node">Income</span>
           <span class="hiw-concept-arrow">→</span>
-          <span class="hiw-concept-node">Action</span>
+          <span class="hiw-concept-node">Allocate</span>
           <span class="hiw-concept-arrow">→</span>
-          <span class="hiw-concept-node hiw-concept-node--relief">Relief</span>
+          <span class="hiw-concept-node hiw-concept-node--relief">Spend with clarity</span>
         </div>
       </section>
 
-      <div class="hiw-body-content">
-
+      <div class="hiw-body-content hiw-inner">
         <section class="hiw-section" aria-labelledby="hiw-problem">
           <p class="section-label">01 &nbsp; The problem</p>
-          <h2 id="hiw-problem">Most systems fail for a simple reason:<br>they remove pressure.</h2>
+          <h2 id="hiw-problem">Most people treat all money<br>as one unlimited pool.</h2>
           <div class="hiw-body">
-            <p>Tasks sit quietly in lists. Nothing pushes you to act. Nothing happens if you avoid them.</p>
-            <p><strong>People avoid friction. Most systems remove it.</strong></p>
-            <p>So the list grows. The days pass. The work stays undone — not because you can't, but because the system made it comfortable not to.</p>
+            <p>Money arrives and sits in a single account. There are no boundaries. Nothing stops you from spending savings on impulse purchases.</p>
+            <p><strong>Small expenses accumulate silently. The pool empties.</strong></p>
+            <p>Not because you spent too much on one thing — but because the system had no categories, no divisions, no visual separation of purpose.</p>
           </div>
         </section>
 
         <hr class="hiw-rule">
 
         <section class="hiw-section" aria-labelledby="hiw-mechanism">
-          <p class="section-label">02 &nbsp; The Audenta mechanism</p>
-          <h2 id="hiw-mechanism">Controlled psychological pressure.</h2>
+          <p class="section-label">02 &nbsp; The Aquilate mechanic</p>
+          <h2 id="hiw-mechanism">Allocation before spending.</h2>
           <div class="hiw-body">
-            <p>Tasks are not passive items in a list. They exist inside a system that works against avoidance.</p>
+            <p>Money does not sit in a single pool. The moment income is logged, it is divided across categories according to your predefined percentages.</p>
           </div>
           <div class="hiw-callout">
             <ul class="hiw-callout-list">
-              <li>Exposes avoidance in real time</li>
-              <li>Demands a decision — complete it, defer it, or confront why you haven't</li>
-              <li>Rewards completion with genuine relief, not a badge</li>
+              <li>Each category holds its own separate balance</li>
+              <li>Spending can only reduce the balance of the selected category</li>
+              <li>You always see what remains in each spending purpose</li>
             </ul>
           </div>
-          <div class="hiw-body" style="margin-top: 20px;">
-            <p>You either move forward, or you confront the fact that you didn't. <strong>That tension is intentional.</strong></p>
+          <div class="hiw-body" style="margin-top: 1.5rem;">
+            <p>This creates psychological separation. <strong>Savings is not available for coffee. That boundary is structural, not willpower.</strong></p>
           </div>
         </section>
 
         <hr class="hiw-rule">
 
         <section class="hiw-section" aria-labelledby="hiw-loop">
-          <p class="section-label">03 &nbsp; The action loop</p>
-          <h2 id="hiw-loop">Four steps. No shortcuts.</h2>
-
+          <p class="section-label">03 &nbsp; The core loop</p>
+          <h2 id="hiw-loop">Four steps. Repeated every month.</h2>
           <div class="hiw-loop">
             <div class="hiw-loop-step">
               <div class="hiw-step-num">1</div>
               <div class="hiw-step-body">
-                <p class="hiw-step-title">Define</p>
-                <p class="hiw-step-desc">You set a clear action that matters — not a vague intention but a specific commitment.</p>
+                <p class="hiw-step-title">Set your categories</p>
+                <p class="hiw-step-desc">Create spending buckets — Savings, Needs, Wants, Growth, or anything else — and assign each a percentage.</p>
               </div>
             </div>
             <div class="hiw-loop-step">
               <div class="hiw-step-num">2</div>
               <div class="hiw-step-body">
-                <p class="hiw-step-title">Confront</p>
-                <p class="hiw-step-desc">The system surfaces the task again and again until it is handled. Avoidance becomes visible.</p>
+                <p class="hiw-step-title">Log income</p>
+                <p class="hiw-step-desc">When money arrives, log it. Aquilate automatically distributes the full amount across your categories at the set percentages.</p>
               </div>
             </div>
             <div class="hiw-loop-step">
               <div class="hiw-step-num">3</div>
               <div class="hiw-step-body">
-                <p class="hiw-step-title">Execute</p>
-                <p class="hiw-step-desc">You complete the task. No tricks. Just the weight of what you said you'd do.</p>
+                <p class="hiw-step-title">Spend from the right category</p>
+                <p class="hiw-step-desc">Every expense is logged against a specific category. The balance of that category drops. Others stay untouched.</p>
               </div>
             </div>
             <div class="hiw-loop-step">
               <div class="hiw-step-num">4</div>
               <div class="hiw-step-body">
-                <p class="hiw-step-title">Release</p>
-                <p class="hiw-step-desc">The pressure disappears. Completion restores clarity and momentum. The loop resets.</p>
+                <p class="hiw-step-title">See where money went</p>
+                <p class="hiw-step-desc">Review the month. Transaction history per category reveals patterns. Repeat next month with better awareness.</p>
               </div>
             </div>
           </div>
@@ -347,31 +162,33 @@
 
         <section class="hiw-section" aria-labelledby="hiw-result">
           <p class="section-label">04 &nbsp; The result</p>
-          <h2 id="hiw-result">Discipline becomes default.</h2>
+          <h2 id="hiw-result">Discipline without complexity.</h2>
           <div class="hiw-body">
-            <p>Audenta does not try to motivate you. It creates an environment where avoidance becomes uncomfortable and action becomes the relief.</p>
-            <p>Over time, consistency stops relying on willpower. It becomes structural.</p>
+            <p>Aquilate does not try to teach you finance. It creates an environment where intentional spending becomes the default, because the structure makes unintentional spending visible.</p>
+            <p>Over time, awareness compounds. Even small incomes begin to feel organized and controlled.</p>
           </div>
           <div class="hiw-result-quote">
-            <p>Discipline stops being a decision.</p>
-            <p>It becomes the default.</p>
+            <p>Money stops feeling chaotic.</p>
+            <p>It becomes allocated — by design.</p>
           </div>
         </section>
-
       </div>
     </div>
 
     <footer class="site-footer" aria-label="Site footer">
-      <span class="footer-left">© 2026 Audenta</span>
+      <span class="footer-left">© 2026 Aquilate</span>
       <div class="footer-socials">
-        <a href="https://www.linkedin.com" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><img src="img/icon-2.png" alt="LinkedIn" /></a>
-                <a href="https://www.youtube.com/@AudentaApp" class="social-link" aria-label="Youtube" target="_blank" rel="noopener noreferrer">
-          <img src="img/image.png" alt="Youtube" />
+        <a href="https://instagram.com/aquilate_fake" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </a>
-        <a href="https://www.instagram.com/audenta.app/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><img src="img/icon.png" alt="Instagram" /></a>
+        <a href="https://youtube.com/aquilate_fake" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+        </a>
+        <a href="https://linkedin.com/company/aquilate_fake" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+        </a>
       </div>
     </footer>
-
   </div>
 </body>
 </html>

@@ -1,8 +1,9 @@
-# Environment variables - NEVER upload this
-.env
+# dependencies
+app/node_modules/
 
-# Dependencies - too large, not needed on GitHub
-node_modules/
+# tauri build output
+app/src-tauri/target/
 
-# Tauri build output
-app/
+# misc
+*.log
+.DS_Store

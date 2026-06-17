@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aquilate — Workspace</title>
+  <link rel="icon" href="imgs/logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    if (localStorage.getItem('aquilate_onboarded') !== 'true') {
+      window.location.replace('onboarding.html');
+    }
+  </script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <img src="imgs/logo.png" alt="Aq" onerror="this.outerHTML='Aq'">
+    </div>
+    Aquilate
+  </div>
+  <div class="topbar-nav">
+    <span class="workspace-title">Workspace</span>
+  </div>
+  <div class="topbar-right">
+    <div class="month-nav">
+      <button class="month-nav-btn" onclick="changeMonth(-1)" title="Previous month">&#8249;</button>
+      <span class="month-nav-label" id="monthLabel">—</span>
+      <button class="month-nav-btn" onclick="changeMonth(1)" title="Next month">&#8250;</button>
+    </div>
+    <div class="settings-wrap" style="position:relative">
+      <button class="settings-btn" onclick="toggleSettings(event)" title="Settings">&#9881;</button>
+      <div class="settings-popup" id="settingsPopup" style="display:none"></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-section" style="padding-bottom:0;flex-shrink:0">
+      <div class="section-label">
+        Pinned Incomes
+        <button class="section-add-btn" onclick="openModal('income')">+ Add</button>
+      </div>
+    </div>
+    <div class="income-section-scroll" id="incomeList"></div>
+
+    <div class="sidebar-section" style="flex-shrink:0">
+      <div class="section-label" style="margin-bottom:10px">
+        <span id="summaryMonthLabel">Summary</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-cell">
+          <div class="summary-cell-label">Income</div>
+          <div class="summary-cell-val pos" id="totalIncome">$0.00</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-cell-label">Expenses</div>
+          <div class="summary-cell-val neg" id="totalExpenses">$0.00</div>
+        </div>
+      </div>
+      <div class="balance-row">
+        <span class="balance-row-label">Balance</span>
+        <span class="balance-row-val" id="currentBalance">$0.00</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1;overflow-y:auto;min-height:0">
+      <div class="section-label">Categories</div>
+      <div class="cat-totals-list" id="catTotalsList"></div>
+    </div>
+
+    <div class="sidebar-section" style="flex-shrink:0">
+      <div class="sidebar-actions">
+        <button class="sidebar-action-btn sidebar-action-primary" onclick="openModal('category')">+ Add Category</button>
+        <button class="sidebar-action-btn sidebar-action-secondary" onclick="openModal('income-entry')">+ Log Income</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="main">
+    <div class="main-toolbar">
+      <button class="toolbar-btn" onclick="openModal('expense')">+ Log Expense</button>
+      <button class="toolbar-btn primary" onclick="openModal('income-entry')">+ Log Income</button>
+    </div>
+    <div class="categories-scroll">
+      <div class="categories-grid" id="categoriesGrid"></div>
+    </div>
+  </main>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modal">
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

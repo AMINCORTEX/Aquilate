@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to Aquilate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ─── DESIGN SYSTEM TOKENS (Synchronized with style.css) ─── */
+    :root {
+      --bg:          #f5f5f3;
+      --surface:     #f5f5f3;
+      --surface-2:   #ededeb;
+      --surface-3:   #e4e4e1;
+      --border:      #e0e0db;
+      --border-soft: #e8e8e5;
+      --border-hard: #c8c8c3;
+      --ink:         #141414;
+      --ink-2:       #4a4a47;
+      --ink-3:       #909089;
+      --ink-4:       #bbbbb5;
+      --accent:      #2b4590;
+      --accent-h:    #203678;
+      --accent-dim:  rgba(43, 69, 144, 0.09);
+      --green:       #1e7d46;
+      --red:         #bf3a2b;
+      --red-dim:     rgba(191, 58, 43, 0.09);
+      --font:        'DM Sans', system-ui, sans-serif;
+      --font-serif:  'DM Serif Display', Georgia, serif;
+      --font-mono:   'DM Mono', 'Fira Mono', monospace;
+      --r-sm:        5.1px;
+      --r:           6.8px;
+      --r-lg:        10.2px;
+      --t:           0.14s ease;
+      --modal-bg:    #ffffff;
+    }
+
+    html[data-theme="dark"] {
+      --bg:          #15161a;
+      --surface:     #15161a;
+      --surface-2:   #1d1f24;
+      --surface-3:   #262830;
+      --border:      #2b2d34;
+      --border-soft: #23252b;
+      --border-hard: #3a3d46;
+      --ink:         #ededed;
+      --ink-2:       #b6b7bd;
+      --ink-3:       #7d7f88;
+      --ink-4:       #56585f;
+      --accent:      #5878d9;
+      --accent-h:    #6f8be6;
+      --accent-dim:  rgba(88, 120, 217, 0.14);
+      --green:       #3fb274;
+      --red:         #e0594a;
+      --red-dim:     rgba(224, 89, 74, 0.12);
+      --modal-bg:    #1d1f24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      font-size: 11.9px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20.4px;
+      transition: background var(--t), color var(--t);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── CARD LAYOUT ─── */
+    .onboard-container {
+      background: var(--modal-bg);
+      border: 0.8px solid var(--border);
+      border-radius: var(--r-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: 34px;
+      box-shadow: 0 3.4px 13.6px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    .progress-track {
+      width: 100%;
+      height: 2.5px;
+      background: var(--border-soft);
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 25%;
+      transition: width 0.2s ease;
+    }
+
+    /* ─── STATES ─── */
+    .state {
+      display: none;
+      animation: fadeIn var(--t) ease forwards;
+    }
+    .state.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4.3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── TYPOGRAPHY ─── */
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 23.8px;
+      font-weight: 400;
+      line-height: 1.25;
+      margin-bottom: 11.9px;
+      color: var(--ink);
+      letter-spacing: -0.2px;
+    }
+    p {
+      font-size: 11.9px;
+      line-height: 1.6;
+      color: var(--ink-2);
+      margin-bottom: 20.4px;
+    }
+    .highlight-text {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ─── INTERACTIVE INPUTS ─── */
+    .theme-toggle-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11.9px;
+      margin-bottom: 20.4px;
+    }
+    .theme-card {
+      border: 0.8px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 17px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 11px;
+      background: var(--surface-2);
+      color: var(--ink-2);
+      transition: all var(--t);
+    }
+    .theme-card:hover {
+      background: var(--surface-3);
+      color: var(--ink);
+    }
+    .theme-card.selected {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+      font-weight: 600;
+    }
+
+    /* Category Dynamic Inputs */
+    .cat-builder {
+      max-height: 180px;
+      overflow-y: auto;
+      margin-bottom: 13.6px;
+      padding-right: 3.4px;
+    }
+    .cat-input-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 8.5px;
+      align-items: center;
+      margin-bottom: 8.5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 6.8px 10.2px;
+      font-family: var(--font);
+      font-size: 11px;
+      color: var(--ink);
+      background: var(--surface-2);
+      border: 0.8px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2.5px var(--accent-dim);
+      background: var(--modal-bg);
+    }
+    .btn-remove {
+      background: transparent;
+      border: none;
+      color: var(--ink-3);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 4.2px 6.8px;
+      border-radius: var(--r-xs);
+      transition: color var(--t), background var(--t);
+    }
+    .btn-remove:hover {
+      color: var(--red);
+      background: var(--red-dim);
+    }
+    .btn-add-cat {
+      background: transparent;
+      border: 0.8px dashed var(--border-hard);
+      color: var(--accent);
+      width: 100%;
+      padding: 7.6px;
+      font-size: 10.6px;
+      font-weight: 500;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      margin-bottom: 11.9px;
+      transition: background var(--t);
+    }
+    .btn-add-cat:hover {
+      background: var(--accent-dim);
+    }
+
+    .alloc-indicator {
+      font-family: var(--font-mono);
+      font-size: 9.8px;
+      color: var(--ink-3);
+      margin-bottom: 20.4px;
+      font-style: italic;
+    }
+    .alloc-indicator.valid { color: var(--green); font-weight: 600; }
+    .alloc-indicator.invalid { color: var(--red); font-weight: 600; }
+
+    /* ─── BUTTONS ─── */
+    .actions-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10.2px;
+    }
+    button.btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: 0.8px solid var(--accent);
+      padding: 6.8px 13.6px;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: background var(--t), border-color var(--t);
+    }
+    button.btn-primary:hover {
+      background: var(--accent-h);
+      border-color: var(--accent-h);
+    }
+    button.btn-flat {
+      background: transparent;
+      border: none;
+      color: var(--ink-3);
+      padding: 6.8px 10.2px;
+      font-family: var(--font);
+      font-size: 11px;
+      cursor: pointer;
+      transition: color var(--t);
+    }
+    button.btn-flat:hover {
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+
+<div class="onboard-container">
+  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="state active" id="state1">
+    <h1>Take control of your money.</h1>
+    <p>Welcome to <span class="highlight-text">Aquilate</span>. A simple place to track income, expenses, and where your money goes.</p>
+    <p>It will take less than two minutes to set up your workspace.</p>
+    <div class="actions-row">
+      <button class="btn-primary" onclick="goToState(2)">Get Started</button>
+    </div>
+  </div>
+
+  <div class="state" id="state2">
+    <h1>Choose your workspace.</h1>
+    <p>Select the appearance that feels most comfortable for daily use. You can change it later at any time.</p>
+    
+    <div class="theme-toggle-group">
+      <div class="theme-card selected" id="themeLight" onclick="selectTheme('light')">Light Mode</div>
+      <div class="theme-card" id="themeDark" onclick="selectTheme('dark')">Dark Mode</div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn-flat" onclick="goToState(1)">Back</button>
+      <button class="btn-primary" onclick="goToState(3)">Continue</button>
+    </div>
+  </div>
+
+  <div class="state" id="state3">
+    <h1>Create your categories.</h1>
+    <p>Categories help organize your money and show where it is being spent or allocated. You can use the defaults, create your own, or skip this step and configure them later.</p>
+    
+    <div class="cat-builder" id="catBuilder"></div>
+    <button class="btn-add-cat" onclick="addNewCatRow('', '')">Add Category</button>
+    <div class="alloc-indicator" id="allocIndicator">Total allocation: 0% — Remaining: 100%</div>
+
+    <div class="actions-row">
+      <button class="btn-flat" onclick="skipCategories()" style="margin-right: auto; padding-left: 0;">Skip for now</button>
+      <button class="btn-flat" onclick="goToState(2)">Back</button>
+      <button class="btn-primary" onclick="saveCategoriesAndMove()">Continue</button>
+    </div>
+  </div>
+
+  <div class="state" id="state4">
+    <h1>You're ready.</h1>
+    <p>Your workspace has been created successfully.</p>
+    <p>Start logging income and expenses to build a clear picture of your finances.</p>
+    <div class="actions-row">
+      <button class="btn-primary" onclick="finishOnboarding()">Open Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (localStorage.getItem('aquilate_onboarded') === 'true') {
+    window.location.replace('index.html');
+  }
+
+  let chosenTheme = 'light';
+let defaultCategories = [
+  { name: 'Savings', pct: 30 },
+  { name: 'Essentials', pct: 50 },
+  { name: 'Personal Spending', pct: 20 }
+];
+
+  function goToState(step) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById(`state${step}`).classList.add('active');
+    
+    const bar = document.getElementById('progressBar');
+    bar.style.width = (step * 25) + '%';
+
+    if (step === 3 && document.getElementById('catBuilder').children.length === 0) {
+      initCategoryBuilder();
+    }
+  }
+
+  function selectTheme(theme) {
+    chosenTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeLight').classList.toggle('selected', theme === 'light');
+    document.getElementById('themeDark').classList.toggle('selected', theme === 'dark');
+  }
+
+  function initCategoryBuilder() {
+    const builder = document.getElementById('catBuilder');
+    builder.innerHTML = '';
+    defaultCategories.forEach(c => addNewCatRow(c.name, c.pct));
+    updateAllocationCounter();
+  }
+
+  function addNewCatRow(name = '', pct = '') {
+    const builder = document.getElementById('catBuilder');
+    const row = document.createElement('div');
+    row.className = 'cat-input-row';
+    row.innerHTML = `
+      <input type="text" placeholder="e.g. Savings" class="cat-name-input" value="${name}" oninput="updateAllocationCounter()"/>
+      <input type="number" placeholder="%" min="1" max="100" class="cat-pct-input" value="${pct}" oninput="updateAllocationCounter()"/>
+      <button class="btn-remove" onclick="this.parentElement.remove(); updateAllocationCounter();">✕</button>
+    `;
+    builder.appendChild(row);
+    updateAllocationCounter();
+  }
+
+  function updateAllocationCounter() {
+    let total = 0;
+    document.querySelectorAll('.cat-pct-input').forEach(input => {
+      total += parseInt(input.value) || 0;
+    });
+
+    const indicator = document.getElementById('allocIndicator');
+    const remaining = 100 - total;
+
+    if (total === 100) {
+      indicator.textContent = "Perfect! Your capital is exactly 100% distributed.";
+      indicator.className = "alloc-indicator valid";
+    } else if (total > 100) {
+      indicator.textContent = `Over-allocated by ${Math.abs(remaining)}%! Please balance to 100%.`;
+      indicator.className = "alloc-indicator invalid";
+    } else {
+      indicator.textContent = `Total allocation: ${total}% — Remaining: ${remaining}%`;
+      indicator.className = "alloc-indicator";
+    }
+  }
+
+  function skipCategories() {
+    localStorage.setItem('aquilate_skip_initial_cats', 'true');
+    goToState(4);
+  }
+
+  function saveCategoriesAndMove() {
+    let total = 0;
+    let categories = [];
+    let valid = true;
+
+    const names = document.querySelectorAll('.cat-name-input');
+    const pcts = document.querySelectorAll('.cat-pct-input');
+
+    names.forEach((el, index) => {
+      const name = el.value.trim();
+      const pct = parseInt(pcts[index].value) || 0;
+      if (!name || pct <= 0) valid = false;
+      total += pct;
+      categories.push({ name, pct });
+    });
+
+    if (!valid || categories.length === 0) {
+      alert('Please fill out all labels and allocation sizes properly.');
+      return;
+    }
+    if (total !== 100) {
+      alert('Your allocation pool must equal exactly 100% to proceed.');
+      return;
+    }
+
+    localStorage.setItem('aquilate_setup_categories', JSON.stringify(categories));
+    localStorage.removeItem('aquilate_skip_initial_cats');
+    goToState(4);
+  }
+
+  function finishOnboarding() {
+    localStorage.setItem('aquilate_theme', chosenTheme);
+    localStorage.setItem('aquilate_onboarded', 'true');
+
+    const setupCats = localStorage.getItem('aquilate_setup_categories');
+    const skipCats = localStorage.getItem('aquilate_skip_initial_cats');
+
+    if (setupCats && !skipCats) {
+      try {
+        const parseCats = JSON.parse(setupCats);
+        let appState = JSON.parse(localStorage.getItem('aquilate_state')) || {
+          month: new Date().getMonth(),
+          year: new Date().getFullYear(),
+          incomes: [],
+          categories: [],
+          transactions: [],
+          nextId: 1
+        };
+
+        appState.categories = parseCats.map((c, index) => ({
+          id: 'cat_' + (appState.nextId++),
+          name: c.name,
+          pct: c.pct
+        }));
+
+        localStorage.setItem('aquilate_state', JSON.stringify(appState));
+      } catch(e) { console.error("Could not sync initialization setup matrix:", e); }
+    }
+
+    localStorage.removeItem('aquilate_setup_categories');
+    localStorage.removeItem('aquilate_skip_initial_cats');
+    window.location.href = 'index.html'; 
+  }
+
+  selectTheme('light');
+</script>
+
+</body>
+</html>

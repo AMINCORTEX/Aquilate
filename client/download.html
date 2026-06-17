@@ -3,42 +3,27 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
-  <title>Audenta — Download</title>
-  <link rel="icon" type="image/png" href="img/Audenta.png">
+  <title>Aquilate — Download</title>
+  <link rel="icon" href="imgs/logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
   <style>
-    html, body { height: 100%; overflow: hidden; }
-    .audenta { height: 100vh; }
-
     .download-layout {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 52px;
-      min-height: 0;
-      position: relative;
-      z-index: 5;
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 3rem 1.5rem; min-height: 0; position: relative; z-index: 5;
     }
 
     .download-container {
-      width: 100%;
-      max-width: 560px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 0;
-      position: relative;
-      z-index: 1;
+      width: 100%; max-width: 560px;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center; gap: 0;
+      position: relative; z-index: 1;
     }
 
     .dl-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 10px; font-weight: 500;
+      font-family: var(--font-mono); font-size: 10px; font-weight: 500;
       letter-spacing: 0.14em; text-transform: uppercase;
       color: var(--text-3); margin-bottom: 20px;
       animation: fadeUp 0.4s ease both;
@@ -46,162 +31,132 @@
 
     .dl-headline {
       font-family: var(--font-body);
-      font-size: clamp(36px, 5vw, 56px);
-      font-weight: 400;
-      color: var(--text-1);
-      line-height: 1.06; letter-spacing: -0.025em;
+      font-size: clamp(32px, 5vw, 56px); font-weight: 400;
+      color: var(--text-1); line-height: 1.06; letter-spacing: -0.025em;
       margin-bottom: 12px;
       animation: fadeUp 0.4s 0.06s ease both;
     }
 
     .dl-subhead {
-      font-size: 14px; font-weight: 400;
-      color: var(--text-3); margin-bottom: 36px;
-      animation: fadeUp 0.4s 0.12s ease both;
+      font-size: 14px; font-weight: 400; color: var(--text-3);
+      margin-bottom: 36px;
     }
 
     .download-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 16px;
-      width: 100%;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; margin-bottom: 16px; width: 100%;
       animation: fadeUp 0.4s 0.18s ease both;
     }
 
     .download-btn {
-      background: var(--bg-2);
-      border: 1px solid var(--border);
-      color: var(--text-1);
-      font-size: 13px; font-weight: 500;
-      padding: 12px 24px;
-      border-radius: var(--radius);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 152px;
-      justify-content: center;
-      transition: all 0.2s ease;
-      font-family: var(--font-body);
+      background: var(--bg-2); border: 1px solid var(--border);
+      color: var(--text-1); font-size: 13px; font-weight: 500;
+      padding: 12px 24px; border-radius: var(--radius);
+      display: inline-flex; align-items: center; gap: 8px;
+      min-width: 148px; justify-content: center;
+      transition: all 0.2s ease; font-family: var(--font-body);
     }
-
-    .download-btn:hover {
-      background: var(--bg-3);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .download-btn svg {
-      width: 14px; height: 14px;
-      fill: none; stroke: currentColor;
-      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-    }
+    .download-btn:hover { background: var(--bg-3); border-color: var(--accent); color: var(--accent); }
+    .download-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
     .secondary-links {
-      display: flex;
-      gap: 24px;
-      justify-content: center;
+      display: flex; gap: 24px; justify-content: center;
       margin-bottom: 28px;
-      font-size: 12px;
       animation: fadeUp 0.4s 0.24s ease both;
     }
-
     .secondary-links a {
-      color: var(--text-3);
-      text-decoration: underline;
-      text-underline-offset: 2px;
-      transition: color 0.2s;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.03em;
+      color: var(--text-3); text-decoration: underline; text-underline-offset: 2px;
+      transition: color 0.2s; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.03em;
     }
-
     .secondary-links a:hover { color: var(--text-1); }
 
     .version-info {
-      font-family: var(--font-mono);
-      font-size: 10px; color: var(--text-4);
-      display: flex; gap: 20px;
-      justify-content: center;
-      border-top: 1px solid var(--border);
-      padding-top: 20px;
-      margin-top: 4px;
+      font-family: var(--font-mono); font-size: 10px; color: var(--text-4);
+      display: flex; gap: 20px; justify-content: center;
+      border-top: 1px solid var(--border); padding-top: 20px; margin-top: 4px;
       animation: fadeUp 0.4s 0.3s ease both;
     }
-
     .version-info span { display: flex; align-items: center; gap: 4px; }
+
+    .dl-note {
+      font-size: 11px; color: var(--text-4); margin-top: 18px;
+      font-family: var(--font-mono); letter-spacing: 0.02em;
+      animation: fadeUp 0.4s 0.36s ease both;
+    }
+
+    /* Target specific clean inline replacement for the footer overrides */
+    .dl-page-footer .footer-socials a {
+      width: 28px;
+      height: 28px;
+    }
+    .dl-page-footer .footer-socials a:hover {
+      color: var(--text-1);
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
-  <div class="audenta">
+  <div class="addit">
 
     <header class="site-header" role="banner">
-      <a href="home.html" class="logo-link" aria-label="Audenta Home">
-        <img class="audenta-icon" src="img/audenta-icon.png" alt="" />
+      <a href="home.html" class="logo-link" aria-label="Aquilate Home">
+        <span class="addit-wordmark">Aquilate</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
         <a href="home.html">Home</a>
-        <a href="contact.html">Contact</a>
         <a href="info.html">How it works</a>
-        <a href="features.html">Features</a>
         <a href="download.html" class="btn-download active">Download</a>
       </nav>
     </header>
 
     <main class="download-layout">
-
       <div class="download-container">
         <span class="dl-eyebrow">Available now</span>
-        <h1 class="dl-headline">Download Audenta</h1>
-        <p class="dl-subhead">A discipline system for structured personal progress.</p>
+        <h1 class="dl-headline">Download Aquilate</h1>
+        <p class="dl-subhead">Allocate income into clear categories before you spend it.</p>
 
         <div class="download-buttons">
           <a href="#" class="download-btn" download>
-            <svg viewBox="0 0 24 24">
-              <rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/>
-              <rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/>
-            </svg>
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg>
             Windows
           </a>
           <a href="#" class="download-btn" download>
-            <svg viewBox="0 0 24 24">
-              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-              <path d="M12 6a6 6 0 1 0 6 6A6 6 0 0 0 12 6z"/>
-            </svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6a6 6 0 1 0 6 6A6 6 0 0 0 12 6z"/></svg>
             macOS
           </a>
           <a href="#" class="download-btn" download>
-            <svg viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-            </svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             Linux
           </a>
         </div>
 
         <div class="secondary-links">
-          <a href="#">Web Version</a>
           <a href="#">Release Notes</a>
           <a href="#">System Requirements</a>
         </div>
 
         <div class="version-info">
-          <span>v2.1.4</span>
-          <span>March 2026</span>
-          <span>84 MB</span>
+          <span>v2.0</span>
+          <span>June 2026</span>
+          <span>Offline · No account</span>
         </div>
+
+        <p class="dl-note">No account required · Runs locally · Your data stays private on your device</p>
       </div>
     </main>
 
-    <footer class="site-footer" aria-label="Site footer">
-      <span class="footer-left">© 2026 Audenta</span>
+    <footer class="site-footer dl-page-footer" aria-label="Site footer">
+      <span class="footer-left">© 2026 Aquilate</span>
       <div class="footer-socials">
-        <a href="https://www.linkedin.com" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><img src="img/icon-2.png" alt="LinkedIn" /></a>
-                <a href="https://www.youtube.com/@AudentaApp" class="social-link" aria-label="Youtube" target="_blank" rel="noopener noreferrer">
-          <img src="img/image.png" alt="Youtube" />
+        <a href="https://instagram.com/aquilate_fake" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </a>
-        <a href="https://www.instagram.com/audenta.app/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><img src="img/icon.png" alt="Instagram" /></a>
+        <a href="https://youtube.com/aquilate_fake" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+        </a>
+        <a href="https://linkedin.com/company/aquilate_fake" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+        </a>
       </div>
     </footer>
 
