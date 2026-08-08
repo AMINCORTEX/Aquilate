@@ -5,57 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Welcome to Aquilate</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <style>
     /* ─── DESIGN SYSTEM TOKENS (Synchronized with style.css) ─── */
     :root {
-      --bg:          #f5f5f3;
-      --surface:     #f5f5f3;
-      --surface-2:   #ededeb;
-      --surface-3:   #e4e4e1;
-      --border:      #e0e0db;
-      --border-soft: #e8e8e5;
-      --border-hard: #c8c8c3;
-      --ink:         #141414;
-      --ink-2:       #4a4a47;
-      --ink-3:       #909089;
-      --ink-4:       #bbbbb5;
-      --accent:      #2b4590;
-      --accent-h:    #203678;
-      --accent-dim:  rgba(43, 69, 144, 0.09);
-      --green:       #1e7d46;
-      --red:         #bf3a2b;
-      --red-dim:     rgba(191, 58, 43, 0.09);
-      --font:        'DM Sans', system-ui, sans-serif;
-      --font-serif:  'DM Serif Display', Georgia, serif;
-      --font-mono:   'DM Mono', 'Fira Mono', monospace;
-      --r-sm:        5.1px;
-      --r:           6.8px;
-      --r-lg:        10.2px;
-      --t:           0.14s ease;
+      --bg:          #f8f9fa;
+      --surface:     #ffffff;
+      --surface-2:   #f1f3f5;
+      --surface-3:   #e9ecef;
+      --border:      #e9ecef;
+      --border-soft: #eef0f2;
+      --border-hard: #dee2e6;
+      --ink:         #111111;
+      --ink-2:       #495057;
+      --ink-3:       #868e96;
+      --ink-4:       #adb5bd;
+      --accent:      #4c6fb3;
+      --accent-h:    #3b5c9a;
+      --accent-dim:  rgba(76, 111, 179, 0.08);
+      --green:       #2f8f57;
+      --red:         #c8493a;
+      --red-dim:     rgba(200, 73, 58, 0.08);
+      --font:        'Inter', Helvetica, Arial, sans-serif;
+      --font-serif:  'Inter', Helvetica, Arial, sans-serif;
+      --font-mono:   'JetBrains Mono', 'Fira Mono', monospace;
+      --r-sm:        8px;
+      --r:           10px;
+      --r-lg:        14px;
+      --t:           0.16s ease;
       --modal-bg:    #ffffff;
     }
 
     html[data-theme="dark"] {
-      --bg:          #15161a;
-      --surface:     #15161a;
-      --surface-2:   #1d1f24;
-      --surface-3:   #262830;
-      --border:      #2b2d34;
-      --border-soft: #23252b;
-      --border-hard: #3a3d46;
-      --ink:         #ededed;
-      --ink-2:       #b6b7bd;
-      --ink-3:       #7d7f88;
-      --ink-4:       #56585f;
-      --accent:      #5878d9;
-      --accent-h:    #6f8be6;
-      --accent-dim:  rgba(88, 120, 217, 0.14);
-      --green:       #3fb274;
-      --red:         #e0594a;
-      --red-dim:     rgba(224, 89, 74, 0.12);
-      --modal-bg:    #1d1f24;
+      --bg:          #131417;
+      --surface:     #1a1c20;
+      --surface-2:   #212429;
+      --surface-3:   #292c32;
+      --border:      #26292f;
+      --border-soft: #1f2126;
+      --border-hard: #35383f;
+      --ink:         #f1f2f3;
+      --ink-2:       #b0b3b8;
+      --ink-3:       #797d84;
+      --ink-4:       #4c4f56;
+      --accent:      #6f8be6;
+      --accent-h:    #8aa1ec;
+      --accent-dim:  rgba(111, 139, 230, 0.14);
+      --green:       #4cae7a;
+      --red:         #e0685a;
+      --red-dim:     rgba(224, 104, 90, 0.12);
+      --modal-bg:    #1a1c20;
     }
 
     * {
@@ -68,26 +68,26 @@
       background: var(--bg);
       color: var(--ink);
       font-family: var(--font);
-      font-size: 11.9px;
-      line-height: 1.5;
+      font-size: 13.5px;
+      line-height: 1.6;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20.4px;
+      padding: 24px;
       transition: background var(--t), color var(--t);
       -webkit-font-smoothing: antialiased;
     }
 
     /* ─── CARD LAYOUT ─── */
     .onboard-container {
-      background: var(--modal-bg);
-      border: 0.8px solid var(--border);
-      border-radius: var(--r-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
       width: 100%;
-      max-width: 480px;
-      padding: 34px;
-      box-shadow: 0 3.4px 13.6px rgba(0,0,0,0.05);
+      max-width: 500px;
+      padding: 42px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.02);
       position: relative;
       overflow: hidden;
     }
@@ -95,7 +95,7 @@
     /* ─── PROGRESS BAR ─── */
     .progress-track {
       width: 100%;
-      height: 2.5px;
+      height: 3px;
       background: var(--border-soft);
       position: absolute;
       top: 0;
@@ -105,7 +105,7 @@
       height: 100%;
       background: var(--accent);
       width: 25%;
-      transition: width 0.2s ease;
+      transition: width 0.25s ease;
     }
 
     /* ─── STATES ─── */
@@ -118,53 +118,54 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4.3px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     /* ─── TYPOGRAPHY ─── */
     h1 {
-      font-family: var(--font-serif);
-      font-size: 23.8px;
-      font-weight: 400;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 26px;
       line-height: 1.25;
-      margin-bottom: 11.9px;
+      margin-bottom: 14px;
       color: var(--ink);
-      letter-spacing: -0.2px;
+      letter-spacing: -0.02em;
     }
     p {
-      font-size: 11.9px;
-      line-height: 1.6;
+      font-size: 13.5px;
+      line-height: 1.65;
       color: var(--ink-2);
-      margin-bottom: 20.4px;
+      margin-bottom: 24px;
     }
     .highlight-text {
       color: var(--accent);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     /* ─── INTERACTIVE INPUTS ─── */
     .theme-toggle-group {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 11.9px;
-      margin-bottom: 20.4px;
+      gap: 14px;
+      margin-bottom: 24px;
     }
     .theme-card {
-      border: 0.8px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: var(--r-sm);
-      padding: 17px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
       font-weight: 500;
-      font-size: 11px;
-      background: var(--surface-2);
+      font-size: 12.5px;
+      background: var(--bg);
       color: var(--ink-2);
       transition: all var(--t);
     }
     .theme-card:hover {
-      background: var(--surface-3);
+      background: var(--surface-2);
       color: var(--ink);
+      border-color: var(--border-hard);
     }
     .theme-card.selected {
       border-color: var(--accent);
@@ -175,33 +176,33 @@
 
     /* Category Dynamic Inputs */
     .cat-builder {
-      max-height: 180px;
+      max-height: 200px;
       overflow-y: auto;
-      margin-bottom: 13.6px;
-      padding-right: 3.4px;
+      margin-bottom: 16px;
+      padding-right: 4px;
     }
     .cat-input-row {
       display: grid;
       grid-template-columns: 2fr 1fr auto;
-      gap: 8.5px;
+      gap: 10px;
       align-items: center;
-      margin-bottom: 8.5px;
+      margin-bottom: 10px;
     }
     input, select {
       width: 100%;
-      padding: 6.8px 10.2px;
+      padding: 9px 12px;
       font-family: var(--font);
-      font-size: 11px;
+      font-size: 12.5px;
       color: var(--ink);
-      background: var(--surface-2);
-      border: 0.8px solid var(--border);
+      background: var(--bg);
+      border: 1px solid var(--border);
       border-radius: var(--r-sm);
       outline: none;
       transition: border-color var(--t), box-shadow var(--t);
     }
     input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 2.5px var(--accent-dim);
+      box-shadow: 0 0 0 3px var(--accent-dim);
       background: var(--modal-bg);
     }
     .btn-remove {
@@ -209,9 +210,9 @@
       border: none;
       color: var(--ink-3);
       cursor: pointer;
-      font-size: 11px;
-      padding: 4.2px 6.8px;
-      border-radius: var(--r-xs);
+      font-size: 12.5px;
+      padding: 5px 8px;
+      border-radius: 6px;
       transition: color var(--t), background var(--t);
     }
     .btn-remove:hover {
@@ -220,15 +221,15 @@
     }
     .btn-add-cat {
       background: transparent;
-      border: 0.8px dashed var(--border-hard);
+      border: 1px dashed var(--border-hard);
       color: var(--accent);
       width: 100%;
-      padding: 7.6px;
-      font-size: 10.6px;
+      padding: 10px;
+      font-size: 12px;
       font-weight: 500;
       border-radius: var(--r-sm);
       cursor: pointer;
-      margin-bottom: 11.9px;
+      margin-bottom: 14px;
       transition: background var(--t);
     }
     .btn-add-cat:hover {
@@ -237,10 +238,9 @@
 
     .alloc-indicator {
       font-family: var(--font-mono);
-      font-size: 9.8px;
+      font-size: 10.5px;
       color: var(--ink-3);
-      margin-bottom: 20.4px;
-      font-style: italic;
+      margin-bottom: 24px;
     }
     .alloc-indicator.valid { color: var(--green); font-weight: 600; }
     .alloc-indicator.invalid { color: var(--red); font-weight: 600; }
@@ -250,21 +250,29 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      gap: 10.2px;
+      gap: 10px;
     }
     button.btn-primary {
-      background: var(--accent);
+      background: var(--ink);
       color: #ffffff;
-      border: 0.8px solid var(--accent);
-      padding: 6.8px 13.6px;
+      border: 1px solid var(--ink);
+      padding: 9px 18px;
       font-family: var(--font);
-      font-size: 11px;
+      font-size: 12.5px;
       font-weight: 500;
       border-radius: var(--r-sm);
       cursor: pointer;
       transition: background var(--t), border-color var(--t);
     }
     button.btn-primary:hover {
+      background: #000;
+      border-color: #000;
+    }
+    html[data-theme="dark"] button.btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    html[data-theme="dark"] button.btn-primary:hover {
       background: var(--accent-h);
       border-color: var(--accent-h);
     }
@@ -272,9 +280,9 @@
       background: transparent;
       border: none;
       color: var(--ink-3);
-      padding: 6.8px 10.2px;
+      padding: 9px 12px;
       font-family: var(--font);
-      font-size: 11px;
+      font-size: 12.5px;
       cursor: pointer;
       transition: color var(--t);
     }
@@ -434,10 +442,12 @@ let defaultCategories = [
       alert('Please fill out all labels and allocation sizes properly.');
       return;
     }
-    if (total !== 100) {
-      alert('Your allocation pool must equal exactly 100% to proceed.');
+    if (total > 100) {
+      alert('Your allocation pool can\'t exceed 100%. Please adjust your categories.');
       return;
     }
+    // Under 100% is allowed — Aquilate tracks the remainder as a visible
+    // "Unallocated" bucket rather than requiring exact allocation up front.
 
     localStorage.setItem('aquilate_setup_categories', JSON.stringify(categories));
     localStorage.removeItem('aquilate_skip_initial_cats');
@@ -470,7 +480,10 @@ let defaultCategories = [
         }));
 
         localStorage.setItem('aquilate_state', JSON.stringify(appState));
-      } catch(e) { console.error("Could not sync initialization setup matrix:", e); }
+      } catch(e) {
+        console.error("Could not save your categories:", e);
+        alert("We couldn't save the categories you just set up (your browser storage may be full or restricted). You'll be taken to the dashboard, but please add your categories again from Settings.");
+      }
     }
 
     localStorage.removeItem('aquilate_setup_categories');

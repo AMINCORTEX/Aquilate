@@ -26,11 +26,19 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
   --accent-2:   #3b5c9a;
   --accent-dim: rgba(76, 111, 179, 0.08);
 
+  /* Brand scale — taken directly from the Aquilate mark.
+     The four bars ARE the allocation concept, so this exact
+     sequence is reused everywhere categories/splits appear. */
+  --brand-1:    #1B2D57; /* the "A" / darkest bar */
+  --brand-2:    #4A6DB7;
+  --brand-3:    #AEB9CC;
+  --brand-4:    #D7D7D7;
+
   --radius:     8px;
   --radius-2:   16px;
 
   --shadow:     0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-lg:  0 20px 40px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-lg:  0 24px 48px rgba(27, 45, 87, 0.07), 0 2px 6px rgba(27, 45, 87, 0.04);
 
   --font-body:  'Inter', Helvetica, Arial, sans-serif;
   --font-mono:  'JetBrains Mono', monospace;
@@ -64,6 +72,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
 .main-nav a {
   font-size: 0.875rem; font-weight: 400; color: var(--text-2);
   transition: color 0.2s ease; position: relative; padding: 0.25rem 0;
+  white-space: nowrap;
 }
 .main-nav a:hover { color: var(--text-1); }
 .main-nav .nav-active { color: var(--text-1); font-weight: 500; }
@@ -79,7 +88,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
   transition: all 0.2s ease;
 }
 .btn-download:hover, .btn-download.active {
-  background: var(--accent); border-color: var(--accent); color: #ffffff !important;
+  background: var(--brand-1); border-color: var(--brand-1); color: #ffffff !important;
 }
 
 /* ─── SCROLL AREAS & GENERIC INTERFACES ─────────────── */
@@ -113,14 +122,20 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── MEDIA QUERIES FOR Shell GLOBAL GLOBAL ──────────── */
+/* ─── RESPONSIVE HEADER / FOOTER ─────────────────────── */
 @media (max-width: 1024px) {
   .site-header, .site-footer { padding-left: 2rem; padding-right: 2rem; }
 }
 
 @media (max-width: 640px) {
-  .site-header { padding: 1rem; gap: 1rem; }
-  .main-nav { gap: 1rem; }
-  .btn-download { padding: 0.4rem 0.8rem; font-size: 0.812rem; }
+  .site-header { padding: 0.9rem 1rem; gap: 0.75rem; }
+  .addit-wordmark { font-size: 0.95rem; }
+  .main-nav { gap: 0.85rem; }
+  .main-nav a { font-size: 0.75rem; }
+  .btn-download { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
   .site-footer { flex-direction: column-reverse; align-items: center; padding: 2rem 1rem; gap: 1rem; text-align: center; }
+}
+
+@media (max-width: 380px) {
+  .main-nav { gap: 0.6rem; }
 }

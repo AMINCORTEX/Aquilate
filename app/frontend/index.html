@@ -6,7 +6,7 @@
   <title>Aquilate — Workspace</title>
   <link rel="icon" href="imgs/logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script>
     if (localStorage.getItem('aquilate_onboarded') !== 'true') {
@@ -23,8 +23,9 @@
     </div>
     Aquilate
   </div>
-  <div class="topbar-nav">
-    <span class="workspace-title">Workspace</span>
+  <div class="topbar-actions">
+    <button class="toolbar-btn" onclick="openModal('expense')">+ Log Expense</button>
+    <button class="toolbar-btn primary" onclick="openModal('income-entry')">+ Log Income</button>
   </div>
   <div class="topbar-right">
     <div class="month-nav">
@@ -77,19 +78,12 @@
     </div>
 
     <div class="sidebar-section" style="flex-shrink:0">
-      <div class="sidebar-actions">
-        <button class="sidebar-action-btn sidebar-action-primary" onclick="openModal('category')">+ Add Category</button>
-        <button class="sidebar-action-btn sidebar-action-secondary" onclick="openModal('income-entry')">+ Log Income</button>
-      </div>
+      <button class="sidebar-action-btn sidebar-action-quiet" onclick="openModal('category')">+ Add Category</button>
     </div>
 
   </aside>
 
   <main class="main">
-    <div class="main-toolbar">
-      <button class="toolbar-btn" onclick="openModal('expense')">+ Log Expense</button>
-      <button class="toolbar-btn primary" onclick="openModal('income-entry')">+ Log Income</button>
-    </div>
     <div class="categories-scroll">
       <div class="categories-grid" id="categoriesGrid"></div>
     </div>

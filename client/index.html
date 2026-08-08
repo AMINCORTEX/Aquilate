@@ -3,7 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
-  <title>Aquilate — Home</title>
+  <title>Aquilate — Allocate Before Spending</title>
   <link rel="icon" href="imgs/logo.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,62 +11,99 @@
   <link rel="stylesheet" href="style.css">
   <style>
     .page-content {
-      flex: 1; 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      align-items: center; 
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
       justify-content: center;
-      padding: 4rem 3.25rem; 
-      gap: 3.5rem;
-      max-width: 1440px; 
-      width: 100%; 
+      padding: 5rem 3.25rem;
+      gap: 4.5rem;
+      max-width: 1280px;
+      width: 100%;
       margin: 0 auto;
     }
 
-    /* ─── HERO LEFT ──── */
-    .hero-section { display: flex; flex-direction: column; animation: fadeUp 0.5s ease both; }
+    /* ─── HERO (the claim) ──── */
+    .hero-section { display: flex; flex-direction: column; animation: fadeUp 0.5s ease both; max-width: 480px; }
     .hero-tag {
       display: inline-flex; align-items: center; gap: 8px;
       font-family: var(--font-mono); font-size: 0.687rem; font-weight: 500;
-      letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3);
-      margin-bottom: 2rem;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3);
+      margin-bottom: 1.75rem;
     }
-    .hero-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-    
+    .hero-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-2); }
+
     .hero-h1 {
-      font-size: clamp(2.3rem, 4.5vw, 3.75rem); font-weight: 400; color: var(--text-1);
-      line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1rem;
+      font-size: clamp(2.35rem, 4.6vw, 3.6rem); font-weight: 400; color: var(--text-1);
+      line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 1.25rem;
     }
-    .hero-h1 strong { font-weight: 600; }
-    .hero-sub { font-size: clamp(1.15rem, 2vw, 1.75rem); font-weight: 400; color: var(--text-3); letter-spacing: -0.02em; margin-bottom: 1.5rem; }
-    .hero-desc { font-size: 0.937rem; color: var(--text-2); line-height: 1.65; margin-bottom: 2.5rem; max-width: 440px; }
+    .hero-h1 strong { font-weight: 600; color: var(--brand-1); }
+    .hero-desc { font-size: 1.0625rem; color: var(--text-2); line-height: 1.65; margin-bottom: 2.25rem; max-width: 420px; }
 
-    /* Categories tag list */
-    .hero-cats { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-    .cat-item {
-      display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem;
-      background: var(--bg-2); border: 1px solid var(--border); border-radius: 100px; box-shadow: var(--shadow);
+    .hero-cta-row { display: flex; align-items: center; gap: 1rem; }
+    .hero-cta-primary {
+      background: var(--brand-1); color: #fff; font-weight: 500; font-size: 0.9375rem;
+      padding: 0.8rem 1.6rem; border-radius: var(--radius);
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex; align-items: center; gap: 8px;
     }
-    .cat-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .cat-name { font-family: var(--font-mono); font-size: 0.687rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-2); }
+    .hero-cta-primary:hover { background: #0f1b38; transform: translateY(-1px); }
+    .hero-cta-secondary {
+      font-size: 0.875rem; color: var(--text-3); font-family: var(--font-mono);
+      letter-spacing: 0.02em; transition: color 0.2s ease;
+    }
+    .hero-cta-secondary:hover { color: var(--text-1); }
 
-    /* ─── DEMO WRAP ──── */
+    /* ─── DEMONSTRATION: the split, shown literally ──── */
     .demo-wrap { display: flex; justify-content: center; animation: fadeUp 0.5s 0.1s ease both; width: 100%; }
+    .demo-stack { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .split-visual {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-2);
+      padding: 1.5rem 1.5rem 1.25rem; box-shadow: var(--shadow-lg);
+    }
+    .split-visual-label {
+      font-family: var(--font-mono); font-size: 0.687rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3);
+      display: flex; justify-content: space-between; margin-bottom: 0.9rem;
+    }
+    .split-visual-amount { color: var(--text-1); font-weight: 600; }
+
+    .split-bar-track {
+      display: flex; width: 100%; height: 14px; border-radius: 7px; overflow: hidden;
+      background: var(--bg-3); margin-bottom: 1rem;
+    }
+    .split-bar-seg {
+      height: 100%; width: 0%;
+      transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .split-visual.is-in .split-bar-seg { width: var(--seg-w); }
+    .split-bar-seg:nth-child(1) { background: var(--brand-1); transition-delay: 0.05s; }
+    .split-bar-seg:nth-child(2) { background: var(--brand-2); transition-delay: 0.18s; }
+    .split-bar-seg:nth-child(3) { background: var(--brand-3); transition-delay: 0.31s; }
+    .split-bar-seg:nth-child(4) { background: var(--brand-4); transition-delay: 0.44s; }
+
+    .split-legend { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
+    .split-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-2); }
+    .split-legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .split-legend-pct { font-family: var(--font-mono); color: var(--text-3); margin-left: 2px; }
+
+    /* ─── EVIDENCE: the real interface ──── */
     .app-category-card {
-      width: 100%; max-width: 360px; background: var(--bg-2);
+      width: 100%; background: var(--bg-2);
       border: 1px solid var(--border); border-radius: var(--radius-2);
-      padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: var(--shadow-lg);
+      padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: var(--shadow);
     }
     .cat-card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .cat-card-title-wrap { display: flex; align-items: center; gap: 10px; }
-    .cat-card-color-indicator { width: 10px; height: 10px; border-radius: 50%; background: #3a7a5a; flex-shrink: 0; }
-    .cat-card-name { font-size: 1.125rem; font-weight: 500; color: var(--text-1); letter-spacing: -0.01em; }
+    .cat-card-color-indicator { width: 10px; height: 10px; border-radius: 50%; background: var(--brand-1); flex-shrink: 0; }
+    .cat-card-name { font-size: 1.0625rem; font-weight: 500; color: var(--text-1); letter-spacing: -0.01em; }
     .cat-card-allocation-badge { font-family: var(--font-mono); font-size: 0.687rem; color: var(--text-2); padding: 4px 8px; background: var(--bg-3); border-radius: 6px; font-weight: 500; flex-shrink: 0; }
-    
+
     .cat-card-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
     .metric-group { display: flex; flex-direction: column; gap: 4px; }
     .metric-label { font-size: 0.687rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
-    .metric-value { font-family: var(--font-mono); font-size: 1.125rem; font-weight: 500; color: var(--text-1); overflow-wrap: break-word; word-break: break-all; }
+    .metric-value { font-family: var(--font-mono); font-size: 1.0625rem; font-weight: 500; color: var(--text-1); overflow-wrap: break-word; word-break: break-all; }
 
     .cat-card-ledger { display: flex; flex-direction: column; gap: 0.75rem; }
     .ledger-title { font-size: 0.687rem; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -77,46 +114,32 @@
     .ledger-desc-text { color: var(--text-1); font-size: 0.812rem; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ledger-date-text { font-size: 0.687rem; color: var(--text-4); font-family: var(--font-mono); }
     .ledger-amount-text { font-family: var(--font-mono); font-size: 0.812rem; font-weight: 500; flex-shrink: 0; }
-    .ledger-amount-text.pos { color: var(--accent); }
+    .ledger-amount-text.pos { color: var(--brand-2); }
     .ledger-amount-text.neg { color: var(--text-2); }
 
-    .cat-card-actions { display: flex; gap: 0.75rem; }
-    .cat-action-btn { flex: 1; padding: 0.625rem; background: var(--bg-3); border-radius: var(--radius); font-size: 0.812rem; font-weight: 500; color: var(--text-2); text-align: center; transition: all 0.2s; }
-    .cat-action-btn:hover { background: var(--bg-4); color: var(--text-1); }
-
-    /* ─── DOWNLOAD PANEL ──── */
-    .download-section { display: flex; flex-direction: column; background: var(--bg-2); padding: 2rem; border-radius: var(--radius-2); border: 1px solid var(--border); box-shadow: var(--shadow); animation: fadeUp 0.5s 0.15s ease both; width: 100%; }
-    .dl-heading { font-size: 1.35rem; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; margin-bottom: 0.5rem; }
-    .dl-sub { font-size: 0.812rem; color: var(--text-3); line-height: 1.5; margin-bottom: 1.5rem; }
-    .dl-buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
-    .dl-btn { height: 42px; background: var(--bg-3); border-radius: var(--radius); color: var(--text-1); font-size: 0.812rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
-    .dl-btn:hover { background: var(--bg-4); }
-    .dl-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-    .dl-btn--primary { background: var(--text-1); color: #fff; }
-    .dl-btn--primary:hover { background: #000; }
-    .dl-version { font-family: var(--font-mono); font-size: 0.687rem; color: var(--text-4); display: flex; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); margin-bottom: 0.75rem; }
-    .dl-philosophy { font-size: 0.687rem; color: var(--text-4); line-height: 1.6; }
-
-    @media (max-width: 1100px) {
-      .page-content { padding: 3rem 2rem; gap: 3rem; }
-    }
-    @media (max-width: 768px) {
-      .page-content { grid-template-columns: 1fr; padding: 2.5rem 1rem; gap: 3.5rem; }
-      .hero-section { align-items: center; text-align: center; }
+    @media (max-width: 900px) {
+      .page-content { grid-template-columns: 1fr; padding: 3rem 1.5rem; gap: 3rem; }
+      .hero-section { align-items: center; text-align: center; max-width: 100%; }
       .hero-desc { max-width: 100%; }
-      .hero-cats { justify-content: center; }
-      .download-section, .app-category-card { max-width: 400px; margin: 0 auto; }
+      .hero-cta-row { justify-content: center; }
+      .demo-stack { max-width: 420px; }
+    }
+    @media (max-width: 480px) {
+      .page-content { padding: 2.25rem 1.1rem; gap: 2.25rem; }
+      .hero-h1 { font-size: clamp(1.9rem, 8vw, 2.4rem); }
+      .hero-desc { font-size: 0.9375rem; }
+      .cat-card-metrics { gap: 1rem; }
     }
   </style>
 </head>
 <body>
   <div class="addit">
     <header class="site-header" role="banner">
-      <a href="home.html" class="logo-link" aria-label="Aquilate Home">
+      <a href="index.html" class="logo-link" aria-label="Aquilate Home">
         <img src="imgs/logo.png" alt="Aquilate Logo" style="height: 1.8rem; width: auto; margin-right: 0.6rem; display: inline-block; vertical-align: middle;" /><span class="addit-wordmark" style="vertical-align: middle;">Aquilate</span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
-        <a href="home.html" class="nav-active">Home</a>
+        <a href="index.html" class="nav-active">Home</a>
         <a href="info.html">How it works</a>
         <a href="download.html" class="btn-download">Download</a>
       </nav>
@@ -126,85 +149,85 @@
       <section class="hero-section" aria-labelledby="hero-heading">
         <span class="hero-tag">
           <span class="hero-tag-dot"></span>
-          Allocation first. Always.
+          Aquilate
         </span>
         <h1 class="hero-h1" id="hero-heading">
-          <strong>Allocate</strong><br>before spending.
+          Money in.<strong> Categories out.</strong>
         </h1>
-        <p class="hero-sub">Allocation first. Always.</p>
         <p class="hero-desc">
-          Aquilate splits your income across clear spending categories the moment it arrives. Just structured budgeting and visible category balances.
+          The moment income lands, Aquilate splits it into the categories you’ve already decided it’s for. No more guessing what a single balance can actually cover.
         </p>
-        <div class="hero-cats" aria-label="Spending categories">
-          <div class="cat-item"><span class="cat-dot" style="background:#3a7a5a"></span><span class="cat-name">Savings</span></div>
-          <div class="cat-item"><span class="cat-dot" style="background:#4a6eb3"></span><span class="cat-name">Needs</span></div>
-          <div class="cat-item"><span class="cat-dot" style="background:#7a6a2a"></span><span class="cat-name">Wants</span></div>
-          <div class="cat-item"><span class="cat-dot" style="background:#4c6fb3"></span><span class="cat-name">Invests</span></div>
+        <div class="hero-cta-row">
+          <a href="download.html" class="hero-cta-primary">Get Aquilate</a>
+          <a href="info.html" class="hero-cta-secondary">See how it works →</a>
         </div>
       </section>
 
-      <div class="demo-wrap" aria-label="Aquilate category card container preview">
-        <div class="app-category-card">
-          <div class="cat-card-header">
-            <div class="cat-card-title-wrap">
-              <span class="cat-card-color-indicator"></span>
-              <span class="cat-card-name">Savings</span>
+      <div class="demo-wrap" aria-label="How income is allocated, shown live">
+        <div class="demo-stack">
+
+          <div class="split-visual" id="splitVisual">
+            <div class="split-visual-label">
+              <span>Paycheck logged</span>
+              <span class="split-visual-amount">$2,400.00</span>
             </div>
-            <span class="cat-card-allocation-badge">40% Alloc</span>
+            <div class="split-bar-track">
+              <div class="split-bar-seg" style="--seg-w:40%"></div>
+              <div class="split-bar-seg" style="--seg-w:30%"></div>
+              <div class="split-bar-seg" style="--seg-w:20%"></div>
+              <div class="split-bar-seg" style="--seg-w:10%"></div>
+            </div>
+            <div class="split-legend">
+              <span class="split-legend-item"><span class="split-legend-dot" style="background:var(--brand-1)"></span>Savings<span class="split-legend-pct">40%</span></span>
+              <span class="split-legend-item"><span class="split-legend-dot" style="background:var(--brand-2)"></span>Needs<span class="split-legend-pct">30%</span></span>
+              <span class="split-legend-item"><span class="split-legend-dot" style="background:var(--brand-3)"></span>Wants<span class="split-legend-pct">20%</span></span>
+              <span class="split-legend-item"><span class="split-legend-dot" style="background:var(--brand-4)"></span>Growth<span class="split-legend-pct">10%</span></span>
+            </div>
           </div>
-          <div class="cat-card-metrics">
-            <div class="metric-group">
-              <span class="metric-label">Allocated</span>
-              <span class="metric-value">$1,600.00</span>
-            </div>
-            <div class="metric-group">
-              <span class="metric-label">Remaining</span>
-              <span class="metric-value">$1,250.00</span>
-            </div>
-          </div>
-          <div class="cat-card-ledger">
-            <div class="ledger-header">
-              <span class="ledger-title">Activity Logs</span>
-            </div>
-            <div class="ledger-logs-list">
-              <div class="ledger-row">
-                <div class="ledger-desc-group">
-                  <span class="ledger-desc-text">Monthly paycheck</span>
-                  <span class="ledger-date-text">Jun 01</span>
-                </div>
-                <span class="ledger-amount-text pos">+$1,600.00</span>
+
+          <div class="app-category-card">
+            <div class="cat-card-header">
+              <div class="cat-card-title-wrap">
+                <span class="cat-card-color-indicator"></span>
+                <span class="cat-card-name">Savings</span>
               </div>
-              <div class="ledger-row">
-                <div class="ledger-desc-group">
-                  <span class="ledger-desc-text">High-yield transfer</span>
-                  <span class="ledger-date-text">Jun 05</span>
+              <span class="cat-card-allocation-badge">40% Alloc</span>
+            </div>
+            <div class="cat-card-metrics">
+              <div class="metric-group">
+                <span class="metric-label">Allocated</span>
+                <span class="metric-value">$960.00</span>
+              </div>
+              <div class="metric-group">
+                <span class="metric-label">Remaining</span>
+                <span class="metric-value">$610.00</span>
+              </div>
+            </div>
+            <div class="cat-card-ledger">
+              <div class="ledger-header">
+                <span class="ledger-title">Activity</span>
+              </div>
+              <div class="ledger-logs-list">
+                <div class="ledger-row">
+                  <div class="ledger-desc-group">
+                    <span class="ledger-desc-text">Monthly paycheck</span>
+                    <span class="ledger-date-text">Jun 01</span>
+                  </div>
+                  <span class="ledger-amount-text pos">+$960.00</span>
                 </div>
-                <span class="ledger-amount-text neg">-$350.00</span>
+                <div class="ledger-row">
+                  <div class="ledger-desc-group">
+                    <span class="ledger-desc-text">High-yield transfer</span>
+                    <span class="ledger-date-text">Jun 05</span>
+                  </div>
+                  <span class="ledger-amount-text neg">-$350.00</span>
+                </div>
               </div>
             </div>
           </div>
-          <div class="cat-card-actions">
-            <button class="cat-action-btn" type="button">+ Expense</button>
-            <button class="cat-action-btn" type="button" style="background:var(--bg-4); font-weight:600; color:var(--text-1);">+ Income</button>
-          </div>
+
         </div>
       </div>
-
-      <section class="download-section" aria-labelledby="dl-heading">
-        <h2 id="dl-heading" class="dl-heading">Get Aquilate</h2>
-        <p class="dl-sub">A minimal finance system for clear spending categories.</p>
-        <div class="dl-buttons">
-          <a href="download.html" class="dl-btn dl-btn--primary">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download for Windows
-          </a>
-        </div>
-        <div class="dl-version">
-          <span>v1.0.0</span>
-          <span>June 2026</span>
-        </div>
-        <p class="dl-philosophy">Aquilate runs locally and keeps your money data private.</p>
-      </section>
     </main>
 
     <footer class="site-footer" aria-label="Site footer">
@@ -222,5 +245,15 @@
       </div>
     </footer>
   </div>
+
+  <script>
+    // Trigger the split-bar demonstration once the page has laid out,
+    // so the visitor sees the split happen rather than arriving pre-filled.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('splitVisual').classList.add('is-in');
+      });
+    });
+  </script>
 </body>
 </html>

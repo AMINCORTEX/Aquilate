@@ -3,6 +3,11 @@ const MONTHS = ['January','February','March','April','May','June',
   'July','August','September','October','November','December'];
 const STORAGE_KEY = 'aquilate_state';
 const THEME_KEY = 'aquilate_theme';
+// Reserved catId for income that isn't covered by any category's allocation
+// (categories sum to under 100%). Transactions with this catId are never
+// silently discarded — they're shown as a distinct "Unallocated" bucket
+// instead, so no dollar disappears without a visible trace.
+const UNALLOC_ID = '__unallocated__';
 
 // ─── DEFAULT EMPTY STATE ───
 function defaultState() {
@@ -18,9 +23,18 @@ function defaultState() {
 }
 
 // ─── LOCAL STORAGE ───
+// Returns true on a confirmed successful write, false otherwise. Callers must
+// not tell the user an action "succeeded" if this returns false — a write
+// that silently fails (quota exceeded, private browsing, disk issues) must
+// never be reported to the user as saved.
 function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-  catch (e) { console.warn('Save failed:', e); }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    return true;
+  } catch (e) {
+    console.warn('Save failed:', e);
+    return false;
+  }
 }
 function loadState() {
   try {
@@ -29,9 +43,31 @@ function loadState() {
       const p = JSON.parse(raw);
       if (typeof p.month === 'number' && Array.isArray(p.incomes) &&
           Array.isArray(p.categories) && Array.isArray(p.transactions)) return p;
+      // Shape check failed but we still have raw bytes — preserve them
+      // before defaultState() gets saved over this key. Without this, the
+      // only copy of a corrupted-but-possibly-recoverable save is destroyed
+      // within milliseconds of detecting the problem.
+      backupRawState(raw, 'invalid-shape');
     }
-  } catch (e) { console.warn('Load failed, resetting:', e); }
+  } catch (e) {
+    console.warn('Load failed, resetting:', e);
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) backupRawState(raw, 'parse-error');
+    } catch (e2) { /* localStorage itself unavailable — nothing more we can do */ }
+  }
   return defaultState();
+}
+// Stash unreadable/corrupt raw state under a separate key (never overwritten
+// automatically) so the user has a path to recovery instead of silent loss.
+function backupRawState(raw, reason) {
+  try {
+    localStorage.setItem(STORAGE_KEY + '_backup', JSON.stringify({
+      savedAt: new Date().toISOString(),
+      reason,
+      raw
+    }));
+  } catch (e) { console.warn('Could not store recovery backup:', e); }
 }
 
 // ─── THEME ───
@@ -75,6 +111,47 @@ function escHtml(s) {
 function fmtMoney(n) {
   return '$' + Math.abs(n).toFixed(2);
 }
+
+/* ── Count-up animation for sidebar totals ── */
+function parseMoneyText(s) {
+  if (!s) return 0;
+  const neg = s.trim().startsWith('-');
+  const num = parseFloat(String(s).replace(/[^0-9.]/g, '')) || 0;
+  return neg ? -num : num;
+}
+function animateMoneyValue(el, toValue, signed) {
+  if (!el) return;
+  const fromValue = parseMoneyText(el.textContent);
+  if (Math.abs(fromValue - toValue) < 0.005) {
+    el.textContent = (signed && toValue < 0 ? '-' : '') + fmtMoney(toValue);
+    return;
+  }
+  const duration = 320;
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const current = fromValue + (toValue - fromValue) * eased;
+    el.textContent = (signed && current < 0 ? '-' : '') + fmtMoney(current);
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = (signed && toValue < 0 ? '-' : '') + fmtMoney(toValue);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── Pulse feedback on the card(s) affected by the entry just logged ── */
+function pulseCards(catIds) {
+  const uniqueIds = Array.from(new Set(catIds));
+  uniqueIds.forEach(id => {
+    const domId = id === UNALLOC_ID ? 'card-unalloc' : 'card-' + id;
+    const el = document.getElementById(domId);
+    if (!el) return;
+    el.classList.remove('just-logged');
+    void el.offsetWidth;
+    el.classList.add('just-logged');
+    setTimeout(() => el.classList.remove('just-logged'), 650);
+  });
+}
 function todayLabel() {
   return MONTHS[state.month].slice(0,3) + ' ' + new Date().getDate();
 }
@@ -101,6 +178,10 @@ function findPinnedIncomeByDesc(desc) {
 }
 
 // ─── RENDER ───
+// Tracks whether the most recent saveState() call actually succeeded, so
+// action handlers can avoid telling the user something was saved when it
+// wasn't.
+let lastSaveOk = true;
 function render() {
   const mk = MONTHS[state.month] + ' ' + state.year;
   document.getElementById('monthLabel').textContent = mk;
@@ -110,7 +191,28 @@ function render() {
   renderSummary();
   renderCatTotals();
   renderCategories();
-  saveState();
+  lastSaveOk = saveState();
+  if (!lastSaveOk) showSaveErrorBanner();
+  else hideSaveErrorBanner();
+}
+
+// Persistent (non-auto-hiding) banner shown when a write to localStorage
+// fails, so the user is never left believing an entry was saved when it
+// wasn't. Distinct from the toast, which is only for confirmed successes.
+function showSaveErrorBanner() {
+  let banner = document.getElementById('saveErrorBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'saveErrorBanner';
+    banner.className = 'save-error-banner';
+    banner.innerHTML = `<span>⚠ Your last change couldn't be saved. Storage may be full or unavailable — free up space or export a backup before continuing.</span>`;
+    document.body.appendChild(banner);
+  }
+  banner.classList.add('show');
+}
+function hideSaveErrorBanner() {
+  const banner = document.getElementById('saveErrorBanner');
+  if (banner) banner.classList.remove('show');
 }
 
 // ── Sidebar: Pinned Incomes ──
@@ -135,21 +237,19 @@ function renderSummary() {
   const totalIn  = txns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const totalOut = txns.filter(t=>t.type==='expense').reduce((s,t)=>s+Math.abs(t.amount),0);
   const bal = totalIn - totalOut;
-  document.getElementById('totalIncome').textContent   = fmtMoney(totalIn);
-  document.getElementById('totalExpenses').textContent = fmtMoney(totalOut);
-  const balEl = document.getElementById('currentBalance');
-  balEl.textContent = (bal < 0 ? '-' : '') + fmtMoney(bal);
+  animateMoneyValue(document.getElementById('totalIncome'), totalIn, false);
+  animateMoneyValue(document.getElementById('totalExpenses'), totalOut, false);
+  animateMoneyValue(document.getElementById('currentBalance'), bal, true);
 }
 
 // ── Sidebar: Category totals ──
 function renderCatTotals() {
   const el = document.getElementById('catTotalsList');
-  if (state.categories.length === 0) {
-    el.innerHTML = '';
-    return;
-  }
   const monthTxns = txnsForCurrentMonth();
-  el.innerHTML = state.categories.map(cat => {
+  const totalPct = state.categories.reduce((s,c) => s + c.pct, 0);
+  const unallocNet = monthTxns.filter(t=>t.catId===UNALLOC_ID).reduce((s,t)=>s+t.amount,0);
+
+  let html = state.categories.map(cat => {
     const net = monthTxns.filter(t=>t.catId===cat.id).reduce((s,t)=>s+t.amount,0);
     return `
       <div class="cat-total-row">
@@ -158,6 +258,21 @@ function renderCatTotals() {
         <span class="cat-total-val">${fmtMoney(net)}</span>
       </div>`;
   }).join('');
+
+  // Show Unallocated whenever categories exist but don't cover 100% (so the
+  // gap is visible even before income is logged), or whenever money has
+  // actually landed there. Don't show it just because no categories exist
+  // yet — that's the normal pre-setup empty state, not a shortfall.
+  if ((state.categories.length > 0 && totalPct < 100) || unallocNet !== 0) {
+    html += `
+      <div class="cat-total-row cat-total-unalloc" title="Income not covered by any category's allocation">
+        <span class="cat-total-name">Unallocated</span>
+        <span class="cat-total-pct">${100 - totalPct}%</span>
+        <span class="cat-total-val">${fmtMoney(unallocNet)}</span>
+      </div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 // Determine the id of the last income transaction and last expense transaction
@@ -196,15 +311,19 @@ function moveCategory(fromIndex, toIndex) {
 function renderCategories() {
   const grid = document.getElementById('categoriesGrid');
 
-  if (state.categories.length === 0) {
+  const monthTxns = txnsForCurrentMonth();
+  const totalPct = state.categories.reduce((s,c) => s + c.pct, 0);
+  const hasUnallocTxns = state.transactions.some(t => t.catId === UNALLOC_ID);
+  const showUnallocCard = (state.categories.length > 0 && totalPct < 100) || hasUnallocTxns;
+
+  if (state.categories.length === 0 && !showUnallocCard) {
     grid.innerHTML = `<div class="grid-empty-hint">Add a category to begin</div>`;
     return;
   }
 
-  const monthTxns = txnsForCurrentMonth();
   const { lastIncomeId, lastExpenseId } = endOfMonthMarkers(currentMonthKey());
 
-  grid.innerHTML = state.categories.map((cat, i) => {
+  let cardsHtml = state.categories.map((cat, i) => {
     const txns = monthTxns.filter(t => t.catId === cat.id);
 
     // Compute running balance rows
@@ -234,6 +353,19 @@ function renderCategories() {
     const disableLeft = (i === 0) ? 'disabled' : '';
     const disableRight = (i === state.categories.length - 1) ? 'disabled' : '';
 
+    // Spend progress: how much of what landed in this category this month has been spent.
+    const catIncome = txns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const catSpent = txns.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+    let spendBarHtml = '';
+    if (catIncome > 0 || catSpent > 0) {
+      const pctUsed = catIncome > 0 ? Math.min(100, (catSpent / catIncome) * 100) : 100;
+      const overBudget = catSpent > catIncome;
+      spendBarHtml = `
+        <div class="cat-spend-bar-wrap" title="${fmtMoney(catSpent)} spent of ${fmtMoney(catIncome)} allocated this month">
+          <div class="cat-spend-bar-fill${overBudget ? ' over' : ''}" style="width:${pctUsed}%"></div>
+        </div>`;
+    }
+
     return `
       <div class="cat-card" id="card-${cat.id}">
         <div class="cat-header">
@@ -256,6 +388,7 @@ function renderCategories() {
             </div>
           </div>
         </div>
+        ${spendBarHtml}
 
         <div class="cat-table">
           <div class="table-head-primary">
@@ -283,8 +416,76 @@ function renderCategories() {
       </div>`;
   }).join('');
 
+  if (showUnallocCard) {
+    const unallocTxns = monthTxns.filter(t => t.catId === UNALLOC_ID);
+    cardsHtml += renderUnallocCard(unallocTxns, lastIncomeId, lastExpenseId, totalPct);
+  }
+
+  grid.innerHTML = cardsHtml;
+
   // Scroll each table body to the latest entry
   document.querySelectorAll('.table-body').forEach(b => { b.scrollTop = b.scrollHeight; });
+}
+
+// Renders the Unallocated bucket as its own card in the main grid — same
+// transaction-row shape as a normal category card, but read-only (no
+// reorder/edit/delete-category controls, since it isn't a real category).
+function renderUnallocCard(txns, lastIncomeId, lastExpenseId, totalPct) {
+  let running = 0;
+  const rows = txns.map(t => {
+    running += t.amount;
+    const changeClass = t.amount >= 0 ? 'pos' : 'neg';
+    const changeStr   = (t.amount >= 0 ? '+' : '−') + fmtMoney(t.amount);
+    const isMarker = (t.id === lastIncomeId) || (t.id === lastExpenseId);
+    const markerClass = isMarker ? ' eom-marker' : '';
+    const markerTitle = isMarker ? ' title="Final ' + (t.type === 'income' ? 'income' : 'expense') + ' of the month"' : '';
+    const descCell = t.desc
+      ? `<div class="td desc" title="${escHtml(t.desc)}">${escHtml(t.desc)}</div>`
+      : `<div class="td desc"></div>`;
+    return `
+      <div class="tr${markerClass}"${markerTitle}>
+        <div class="td date">${escHtml(t.date)}</div>
+        ${descCell}
+        <div class="td change ${changeClass}">${changeStr}</div>
+        <div class="td balance">${fmtMoney(running)}</div>
+        <div class="td del-cell">
+          <button class="tr-del-btn" onclick="deleteTransaction(event,${t.id})">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const emptyHint = `<div class="grid-empty-hint" style="padding:20px 0">No income has landed here.</div>`;
+
+  return `
+    <div class="cat-card cat-card-unalloc" id="card-unalloc">
+      <div class="cat-header">
+        <div class="cat-header-left">
+          <span class="cat-name">Unallocated</span>
+          <span class="cat-meta">${100 - totalPct}% of income has no category</span>
+        </div>
+      </div>
+
+      <div class="cat-table">
+        <div class="table-head-primary">
+          <span class="th">Date</span>
+          <span class="th">Desc</span>
+          <span class="th">Amount</span>
+          <span class="th right">Balance</span>
+          <span class="th"></span>
+        </div>
+        <div class="table-head-secondary">
+          <span class="th-sub">When</span>
+          <span class="th-sub">Added / taken</span>
+          <span class="th-sub right">Running total</span>
+          <span class="th-sub"></span>
+        </div>
+        <div class="table-body" id="tbody-unalloc">${rows || emptyHint}</div>
+      </div>
+
+      <div class="cat-footer">
+        <span class="cat-footer-note">Add or expand categories to allocate this money — nothing here is lost.</span>
+      </div>
+    </div>`;
 }
 
 // ─── CATEGORY MENU ───
@@ -311,7 +512,17 @@ function changeMonth(dir) {
   state.month += dir;
   if (state.month > 11) { state.month = 0; state.year++; }
   if (state.month < 0)  { state.month = 11; state.year--; }
-  render();
+
+  const grid = document.getElementById('categoriesGrid');
+  if (grid) {
+    grid.classList.add('grid-transitioning');
+    setTimeout(() => {
+      render();
+      grid.classList.remove('grid-transitioning');
+    }, 130);
+  } else {
+    render();
+  }
 }
 
 // ─── SETTINGS ───
@@ -343,7 +554,103 @@ function renderSettingsPopup() {
     <button class="settings-option ${current === 'dark' ? 'active' : ''}"
       onclick="event.stopPropagation(); setTheme('dark')">
       <span>Dark theme</span>${current === 'dark' ? '<span class="settings-check">✓</span>' : ''}
-    </button>`;
+    </button>
+    <div class="settings-popup-title" style="margin-top:10px">Data</div>
+    <div class="settings-popup-note">Your data is stored only on this device and never leaves it. Export a backup anytime.</div>
+    <button class="settings-option" onclick="event.stopPropagation(); exportBackupJSON()">
+      <span>Export backup (.json)</span>
+    </button>
+    <button class="settings-option" onclick="event.stopPropagation(); exportTransactionsCSV()">
+      <span>Export transactions (.csv)</span>
+    </button>
+    <button class="settings-option" onclick="event.stopPropagation(); triggerImportBackup()">
+      <span>Import backup…</span>
+    </button>
+    <input type="file" id="importFileInput" accept="application/json"
+      style="display:none" onchange="importBackupJSON(event)" onclick="event.stopPropagation()" />`;
+}
+
+// ─── EXPORT / IMPORT ───
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportBackupJSON() {
+  const dateStamp = new Date().toISOString().slice(0,10);
+  downloadFile(`aquilate-backup-${dateStamp}.json`, JSON.stringify(state, null, 2), 'application/json');
+  closeAllMenus();
+  showToast('Backup exported');
+}
+
+function csvEscape(v) {
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function exportTransactionsCSV() {
+  const catNameById = {};
+  state.categories.forEach(c => { catNameById[c.id] = c.name; });
+  catNameById[UNALLOC_ID] = 'Unallocated';
+
+  const header = ['Date','Month','Category','Description','Type','Amount'];
+  const rows = state.transactions.map(t => [
+    t.date,
+    t.monthKey,
+    catNameById[t.catId] || t.catId,
+    t.desc || '',
+    t.type,
+    t.amount
+  ]);
+  const csv = [header, ...rows].map(r => r.map(csvEscape).join(',')).join('\n');
+
+  const dateStamp = new Date().toISOString().slice(0,10);
+  downloadFile(`aquilate-transactions-${dateStamp}.csv`, csv, 'text/csv');
+  closeAllMenus();
+  showToast('Transactions exported');
+}
+
+function triggerImportBackup() {
+  const input = document.getElementById('importFileInput');
+  if (input) input.click();
+}
+
+function importBackupJSON(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try {
+      parsed = JSON.parse(reader.result);
+    } catch (e) {
+      alert('That file isn\'t valid JSON — import cancelled.');
+      return;
+    }
+    const looksValid = parsed && typeof parsed.month === 'number' &&
+      Array.isArray(parsed.incomes) && Array.isArray(parsed.categories) &&
+      Array.isArray(parsed.transactions);
+    if (!looksValid) {
+      alert('That file doesn\'t look like an Aquilate backup — import cancelled.');
+      return;
+    }
+    if (!confirm('Importing will replace all current data in this workspace with the backup. This can\'t be undone. Continue?')) {
+      return;
+    }
+    state = parsed;
+    closeAllMenus();
+    render();
+    if (lastSaveOk) showToast('Backup imported');
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 // ─── MODALS ───
@@ -565,6 +872,31 @@ function selectDescSuggestion(inputId, value) {
   const box = document.getElementById(inputId + '-suggestions');
   if (input) input.value = value;
   if (box) { box.innerHTML = ''; box.style.display = 'none'; }
+
+  // Repeat-entry: pre-fill the amount from the last time this exact
+  // description was logged, so a recurring entry is pick-then-confirm
+  // instead of pick-then-retype. Pre-selected so overtyping it is one step.
+  const amountEl = document.getElementById(inputId.replace('-desc', '-amount'));
+  if (amountEl) {
+    const last = lastAmountForDesc(value);
+    if (last != null) {
+      amountEl.value = last;
+      amountEl.focus();
+      amountEl.select();
+    } else {
+      amountEl.focus();
+    }
+  }
+}
+
+function lastAmountForDesc(desc) {
+  const norm = (desc || '').trim().toLowerCase();
+  if (!norm) return null;
+  for (let i = state.transactions.length - 1; i >= 0; i--) {
+    const t = state.transactions[i];
+    if ((t.desc || '').trim().toLowerCase() === norm) return Math.abs(t.amount);
+  }
+  return null;
 }
 
 // Rebuild distribution preview as user edits the total amount field
@@ -615,7 +947,7 @@ function addIncome() {
   if (isNaN(amount) || amount <= 0) { showToast('Enter a valid amount.'); return; }
   state.incomes.push({ id: state.nextId++, name, amount, type });
   closeModal(); render();
-  showToast(`"${name}" added`);
+  showSuccessToast(`"${name}" added`);
 }
 
 function deleteIncome(e, id) {
@@ -624,7 +956,7 @@ function deleteIncome(e, id) {
   if (!src) return;
   state.incomes = state.incomes.filter(i => i.id !== id);
   render();
-  showToast(`"${src.name}" removed`);
+  showSuccessToast(`"${src.name}" removed`);
 }
 
 // Click on pinned income → open distribution preview modal (now editable)
@@ -645,6 +977,7 @@ function applyIncomeDist(srcId) {
   const label = src ? src.name : 'Income';
   const mk = currentMonthKey();
   let totalApplied = 0;
+  const touchedIds = [];
 
   state.categories.forEach(cat => {
     const inp = document.getElementById('dist-amt-' + cat.id);
@@ -655,13 +988,26 @@ function applyIncomeDist(srcId) {
         date, desc: label, amount: amt, type: 'income'
       });
       totalApplied += amt;
+      touchedIds.push(cat.id);
     }
   });
 
   if (totalApplied === 0) { showToast('Enter at least one amount.'); return; }
 
+  const amountEl = document.getElementById('id-amount');
+  const totalAmount = parseFloat(amountEl.value) || 0;
+  const remainder = parseFloat((totalAmount - totalApplied).toFixed(2));
+  if (remainder > 0.004) {
+    state.transactions.push({
+      id: state.nextId++, catId: UNALLOC_ID, monthKey: mk,
+      date, desc: label, amount: remainder, type: 'income'
+    });
+    touchedIds.push(UNALLOC_ID);
+  }
+
   closeModal(); render();
-  showToast(`${fmtMoney(totalApplied)} distributed`);
+  pulseCards(touchedIds);
+  showSuccessToast(`${fmtMoney(totalApplied)} distributed`);
 }
 
 // Manual Log Income (toolbar / sidebar button) — redesigned:
@@ -682,13 +1028,16 @@ function logIncome() {
   const matched = findPinnedIncomeByDesc(desc);
   const label = matched ? matched.name : desc;
 
-  distributeIncome(amount, label, date);
+  const touchedIds = distributeIncome(amount, label, date);
   closeModal(); render();
-  showToast(`${fmtMoney(amount)} distributed`);
+  pulseCards(touchedIds);
+  showSuccessToast(`${fmtMoney(amount)} distributed`);
 }
 
 function distributeIncome(amount, label, date) {
   const mk = currentMonthKey();
+  let allocated = 0;
+  const touchedIds = [];
   state.categories.forEach(cat => {
     const share = parseFloat((amount * cat.pct / 100).toFixed(2));
     if (share > 0) {
@@ -696,8 +1045,22 @@ function distributeIncome(amount, label, date) {
         id: state.nextId++, catId: cat.id, monthKey: mk,
         date, desc: label, amount: share, type: 'income'
       });
+      allocated += share;
+      touchedIds.push(cat.id);
     }
   });
+  // Categories may sum to under 100% (or there may be no categories yet) —
+  // whatever isn't covered goes into the visible Unallocated bucket rather
+  // than vanishing.
+  const remainder = parseFloat((amount - allocated).toFixed(2));
+  if (remainder > 0) {
+    state.transactions.push({
+      id: state.nextId++, catId: UNALLOC_ID, monthKey: mk,
+      date, desc: label, amount: remainder, type: 'income'
+    });
+    touchedIds.push(UNALLOC_ID);
+  }
+  return touchedIds;
 }
 
 // Direct income into a single category (footer + button)
@@ -712,7 +1075,8 @@ function addDirectIncome(catId) {
     date, desc, amount: amount, type: 'income'
   });
   closeModal(); render();
-  showToast(`+${fmtMoney(amount)} added`);
+  pulseCards([catId]);
+  showSuccessToast(`+${fmtMoney(amount)} added`);
 }
 
 // ─── EXPENSE ACTIONS ───
@@ -729,7 +1093,8 @@ function addExpense() {
     date, desc, amount: -amount, type: 'expense'
   });
   closeModal(); render();
-  showToast(`−${fmtMoney(amount)} logged`);
+  pulseCards([catId]);
+  showSuccessToast(`−${fmtMoney(amount)} logged`);
 }
 
 // Direct expense from category footer button
@@ -744,14 +1109,15 @@ function addDirectExpense(catId) {
     date, desc, amount: -amount, type: 'expense'
   });
   closeModal(); render();
-  showToast(`−${fmtMoney(amount)} logged`);
+  pulseCards([catId]);
+  showSuccessToast(`−${fmtMoney(amount)} logged`);
 }
 
 function deleteTransaction(e, id) {
   e.stopPropagation();
   state.transactions = state.transactions.filter(t => t.id !== id);
   render();
-  showToast('Transaction removed');
+  showSuccessToast('Transaction removed');
 }
 
 // ─── CATEGORY ACTIONS ───
@@ -764,7 +1130,7 @@ function addCategory() {
   if (used + pct > 100) { showToast(`Only ${100-used}% remaining.`); return; }
   state.categories.push({ id: 'cat_' + state.nextId++, name, pct });
   closeModal(); render();
-  showToast(`"${name}" added (${pct}%)`);
+  showSuccessToast(`"${name}" added (${pct}%)`);
 }
 
 function saveEditCategory(catId) {
@@ -779,7 +1145,7 @@ function saveEditCategory(catId) {
   cat.name = name;
   cat.pct  = pct;
   closeModal(); render();
-  showToast(`Category updated`);
+  showSuccessToast(`Category updated`);
 }
 
 function confirmDeleteCategory(catId) {
@@ -793,7 +1159,7 @@ function deleteCategory(catId) {
   state.categories    = state.categories.filter(c => c.id !== catId);
   state.transactions  = state.transactions.filter(t => t.catId !== catId);
   closeModal(); render();
-  showToast(`"${cat.name}" deleted`);
+  showSuccessToast(`"${cat.name}" deleted`);
 }
 
 // ─── TOAST ───
@@ -802,6 +1168,13 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
+}
+// Use this (instead of showToast) for messages that confirm data was saved.
+// Call this AFTER render(), so lastSaveOk reflects the write that just
+// happened. If the write failed, the persistent error banner is already
+// showing, and we must not additionally tell the user it worked.
+function showSuccessToast(msg) {
+  if (lastSaveOk) showToast(msg);
 }
 
 // ─── INIT ───
