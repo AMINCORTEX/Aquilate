@@ -100,7 +100,13 @@ html[data-theme="dark"] {
 
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+html {
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  /* Scale the whole UI down 15% so it reads like 85% zoom even though
+     the browser/webview reports 100%. `zoom` (not `transform`) is used
+     so layout, scrolling, and fixed/sticky positioning all just work. */
+  zoom: 0.85;
+}
 
 body {
   font-family: var(--font);

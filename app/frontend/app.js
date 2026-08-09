@@ -1,7 +1,6 @@
 // ─── CONSTANTS ───
 const MONTHS = ['January','February','March','April','May','June',
   'July','August','September','October','November','December'];
-const STORAGE_KEY = 'aquilate_state';
 const THEME_KEY = 'aquilate_theme';
 // Reserved catId for income that isn't covered by any category's allocation
 // (categories sum to under 100%). Transactions with this catId are never
@@ -22,52 +21,41 @@ function defaultState() {
   };
 }
 
-// ─── LOCAL STORAGE ───
-// Returns true on a confirmed successful write, false otherwise. Callers must
-// not tell the user an action "succeeded" if this returns false — a write
-// that silently fails (quota exceeded, private browsing, disk issues) must
-// never be reported to the user as saved.
-function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    return true;
-  } catch (e) {
-    console.warn('Save failed:', e);
-    return false;
+// ─── PERSISTENCE (file-backed, via AquilatePersistence / Tauri fs) ───
+// State now lives in a real file in the OS app-data folder (see
+// persistence.js). saveState() is async and fires a rolling backup before
+// every write. render() no longer awaits it inline (many call sites do
+// `render(); pulseCards(...); showSuccessToast(...)` synchronously) — instead
+// it kicks off the save and tracks it as `pendingSave`, a promise resolving
+// to true/false, which showSuccessToast() awaits before deciding whether to
+// tell the user their entry was saved.
+let pendingSave = Promise.resolve(true);
+let lastSaveOk = true;
+
+async function saveState() {
+  const result = await window.AquilatePersistence.saveStateToFile(state);
+  lastSaveOk = result.ok;
+  if (result.ok) {
+    updateLastBackedUpLabel(result.lastBackedUpAt);
   }
+  return result.ok;
 }
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw);
-      if (typeof p.month === 'number' && Array.isArray(p.incomes) &&
-          Array.isArray(p.categories) && Array.isArray(p.transactions)) return p;
-      // Shape check failed but we still have raw bytes — preserve them
-      // before defaultState() gets saved over this key. Without this, the
-      // only copy of a corrupted-but-possibly-recoverable save is destroyed
-      // within milliseconds of detecting the problem.
-      backupRawState(raw, 'invalid-shape');
-    }
-  } catch (e) {
-    console.warn('Load failed, resetting:', e);
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) backupRawState(raw, 'parse-error');
-    } catch (e2) { /* localStorage itself unavailable — nothing more we can do */ }
+
+// Called once at startup (see init() near the bottom of this file). Returns
+// the loaded state, or null if this is a fresh install with nothing saved
+// yet — the caller falls back to defaultState() in that case. If the file
+// exists but is corrupted, this does NOT return a fallback state — it shows
+// the recovery modal and never resolves the normal startup path, matching
+// "stop and ask" rather than "silently reset."
+async function loadState() {
+  const result = await window.AquilatePersistence.loadStateFromFile();
+  if (result.corrupted) {
+    await showCorruptedFileRecovery(result.reason);
+    // showCorruptedFileRecovery only returns once the user has restored a
+    // backup (which rewrites the primary file), so re-read it now.
+    return await loadState();
   }
-  return defaultState();
-}
-// Stash unreadable/corrupt raw state under a separate key (never overwritten
-// automatically) so the user has a path to recovery instead of silent loss.
-function backupRawState(raw, reason) {
-  try {
-    localStorage.setItem(STORAGE_KEY + '_backup', JSON.stringify({
-      savedAt: new Date().toISOString(),
-      reason,
-      raw
-    }));
-  } catch (e) { console.warn('Could not store recovery backup:', e); }
+  return result.state; // possibly null — caller supplies defaultState()
 }
 
 // ─── THEME ───
@@ -91,7 +79,12 @@ function setTheme(theme) {
 }
 
 // ─── STATE ───
-let state = loadState();
+// Populated asynchronously by init() at the bottom of this file, once the
+// file-backed load (and any corrupted-file recovery) has completed. Nothing
+// above this line touches `state`, and render()/all action handlers are
+// only reachable after init() finishes, so this is safe to leave undefined
+// until then.
+let state;
 
 // Track which category menu is open
 let openMenuCatId = null;
@@ -178,10 +171,6 @@ function findPinnedIncomeByDesc(desc) {
 }
 
 // ─── RENDER ───
-// Tracks whether the most recent saveState() call actually succeeded, so
-// action handlers can avoid telling the user something was saved when it
-// wasn't.
-let lastSaveOk = true;
 function render() {
   const mk = MONTHS[state.month] + ' ' + state.year;
   document.getElementById('monthLabel').textContent = mk;
@@ -191,9 +180,17 @@ function render() {
   renderSummary();
   renderCatTotals();
   renderCategories();
-  lastSaveOk = saveState();
-  if (!lastSaveOk) showSaveErrorBanner();
-  else hideSaveErrorBanner();
+
+  // Fire-and-track: saveState() is async (file + backup I/O). We don't
+  // await it here since render() itself must stay synchronous for all the
+  // existing `closeModal(); render(); pulseCards(...); showSuccessToast(...)`
+  // call sites to keep working unmodified. showSuccessToast() awaits this
+  // promise before deciding whether to claim the entry was saved.
+  pendingSave = saveState().then(ok => {
+    if (!ok) showSaveErrorBanner();
+    else hideSaveErrorBanner();
+    return ok;
+  });
 }
 
 // Persistent (non-auto-hiding) banner shown when a write to localStorage
@@ -570,6 +567,92 @@ function renderSettingsPopup() {
       style="display:none" onchange="importBackupJSON(event)" onclick="event.stopPropagation()" />`;
 }
 
+// ─── CORRUPTED FILE RECOVERY ───
+// Shown at startup, before init() proceeds, if the primary data file exists
+// but fails to parse/validate. Never falls back to an empty state on its
+// own — the user must explicitly pick a backup (or, if they truly want a
+// clean slate, that's a separate deliberate action, not this modal's job).
+// Resolves once a backup has been restored and the primary file rewritten.
+function showCorruptedFileRecovery(reason) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    const content = document.getElementById('modalContent');
+
+    const reasonText = reason === 'parse-error'
+      ? "couldn't be read as valid JSON"
+      : "doesn't look like a valid Aquilate save";
+
+    window.AquilatePersistence.listBackups().then(backups => {
+      const backupRows = backups.length
+        ? backups.map(name => `
+            <button class="settings-option" onclick="event.stopPropagation(); restoreRecoveryBackup('${name.replace(/'/g,"\\'")}')">
+              <span>${escHtml(name)}</span>
+            </button>`).join('')
+        : `<div class="modal-note">No backups were found either — there's nothing to restore from yet.</div>`;
+
+      content.innerHTML = `
+        <div class="modal-title">Your data file ${reasonText}</div>
+        <p style="color:var(--ink-2);font-size:11.9px;line-height:1.6;margin-bottom:10px">
+          Aquilate stopped instead of silently starting over, since that file
+          may still hold your real history. Pick a backup below to restore
+          from — newest first.
+        </p>
+        <div class="dist-preview">${backupRows}</div>
+      `;
+      overlay.classList.add('open');
+      window.__recoveryResolve = resolve;
+    });
+  });
+}
+
+async function restoreRecoveryBackup(filename) {
+  try {
+    const result = await window.AquilatePersistence.restoreFromBackup(filename);
+    if (!result.ok) {
+      alert("Restoring that backup failed: " + (result.error || 'unknown error') + ". Try a different backup.");
+      return;
+    }
+    document.getElementById('modalOverlay').classList.remove('open');
+    const resolve = window.__recoveryResolve;
+    window.__recoveryResolve = null;
+    if (resolve) resolve();
+  } catch (e) {
+    alert("Restoring that backup failed: " + String(e) + ". Try a different backup.");
+  }
+}
+
+// ─── LAST BACKED UP INDICATOR ───
+let lastBackedUpAtISO = null;
+let lastBackedUpTimer = null;
+
+function updateLastBackedUpLabel(iso) {
+  lastBackedUpAtISO = iso || lastBackedUpAtISO;
+  const el = document.getElementById('lastBackedUpLabel');
+  if (!el) return;
+  if (!lastBackedUpAtISO) { el.textContent = ''; return; }
+  el.textContent = 'Backed up ' + relativeTimeFrom(lastBackedUpAtISO);
+  el.title = new Date(lastBackedUpAtISO).toLocaleString();
+}
+
+function relativeTimeFrom(iso) {
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+  if (secs < 10) return 'just now';
+  if (secs < 60) return secs + 's ago';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return mins + (mins === 1 ? ' minute ago' : ' minutes ago');
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+  const days = Math.floor(hrs / 24);
+  return days + (days === 1 ? ' day ago' : ' days ago');
+}
+
+// Keep the relative-time text ("2 minutes ago") ticking even with no new
+// saves happening.
+function startLastBackedUpTicker() {
+  if (lastBackedUpTimer) clearInterval(lastBackedUpTimer);
+  lastBackedUpTimer = setInterval(() => updateLastBackedUpLabel(), 30000);
+}
+
 // ─── EXPORT / IMPORT ───
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
@@ -647,7 +730,7 @@ function importBackupJSON(event) {
     state = parsed;
     closeAllMenus();
     render();
-    if (lastSaveOk) showToast('Backup imported');
+    showSuccessToast('Backup imported');
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -1170,13 +1253,27 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 // Use this (instead of showToast) for messages that confirm data was saved.
-// Call this AFTER render(), so lastSaveOk reflects the write that just
-// happened. If the write failed, the persistent error banner is already
-// showing, and we must not additionally tell the user it worked.
-function showSuccessToast(msg) {
-  if (lastSaveOk) showToast(msg);
+// Call this AFTER render(). It awaits the save that render() just kicked
+// off, so the toast only ever appears once the write actually completed. If
+// the write failed, the persistent error banner is already showing, and we
+// must not additionally tell the user it worked. Callers don't need to
+// await this — it's fire-and-forget by design, same as the old version.
+async function showSuccessToast(msg) {
+  const ok = await pendingSave;
+  if (ok) showToast(msg);
 }
 
 // ─── INIT ───
 applyTheme(loadTheme());
-render();
+
+async function init() {
+  const loaded = await loadState();     // null on fresh install; recovery modal handled internally
+  state = loaded || defaultState();
+
+  const existingBackedUpAt = await window.AquilatePersistence.getLastBackedUpAt();
+  if (existingBackedUpAt) updateLastBackedUpLabel(existingBackedUpAt);
+  startLastBackedUpTicker();
+
+  render();
+}
+init();
