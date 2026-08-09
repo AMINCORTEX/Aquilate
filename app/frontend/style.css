@@ -106,13 +106,24 @@ html {
      the browser/webview reports 100%. `zoom` (not `transform`) is used
      so layout, scrolling, and fixed/sticky positioning all just work. */
   zoom: 0.85;
+  /* `height: 100%` (not `100vh`) below is deliberate: some webviews resolve
+     vh/vw units against the *unzoomed* viewport while everything else in
+     this zoomed subtree paints at 85%. That mismatch is what was leaving a
+     ~15-20% gap at the bottom of the page and letting a 4th category card
+     peek into view early — see body/.layout/.categories-grid below.
+     Percentages resolved against the initial containing block don't have
+     that mismatch, so full-viewport sizing here uses those (or flexbox /
+     container-query units) instead of vh/vw anywhere in this file. */
+  height: 100%;
 }
 
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--ink);
-  height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   font-size: 13.5px;
   line-height: 1.6;
   overflow: hidden;
@@ -144,7 +155,7 @@ select:focus-visible {
   background: rgba(255,255,255,0.85);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
+  position: relative; z-index: 100;
   flex-shrink: 0;
 }
 html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
@@ -282,7 +293,8 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 .layout {
   display: grid;
   grid-template-columns: 250px 1fr;
-  height: calc(100vh - 60px);
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -551,14 +563,24 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   height: 100%; width: 100%;
   scrollbar-width: thin;
   scrollbar-color: var(--border-hard) transparent;
+  /* Establish a query container so the grid below can size cards off this
+     element's own (already sidebar- and padding-aware) content box instead
+     of the raw viewport. `vw` can't tell the difference between the real
+     viewport and this zoomed-down subtree, which was letting a sliver of a
+     4th card show before any scrolling happened. Container query units
+     don't have that ambiguity — they're always the actual rendered box. */
+  container-type: inline-size;
+  container-name: cats-scroll;
 }
 .categories-scroll::-webkit-scrollbar { height: 4px; }
 .categories-scroll::-webkit-scrollbar-thumb { background: var(--border-hard); border-radius: 4px; }
 
 .categories-grid {
   position: relative;
-  --card-w: calc((100vw - 250px - 44px - 22px) / 3);
   --gap-w: 16px;
+  /* 100cqw is this container's own content-box width (padding already
+     excluded), so exactly 3 cards + 2 gaps fill it — no more, no less. */
+  --card-w: calc((100cqw - (2 * var(--gap-w))) / 3);
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: var(--card-w);
@@ -576,7 +598,7 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 .grid-empty-hint {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   height: 100%; width: 100%;
-  min-width: calc(100vw - 250px - 44px);
+  min-width: 100cqw;
   gap: 8px;
 }
 .grid-empty-hint::before {
@@ -846,12 +868,12 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 }
 .tr:hover { background: var(--bg); border-color: var(--border); }
 
-.tr.eom {
+.tr.eom-marker {
   background: var(--eom-dim);
   border-left: 3px solid var(--eom);
   padding-left: 17px;
 }
-.tr.eom:hover { background: var(--eom-dim); }
+.tr.eom-marker:hover { background: var(--eom-dim); }
 
 .td.desc {
   font-size: 12px;
@@ -941,7 +963,7 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   box-shadow: var(--shadow-lg);
   transform: translateY(10px) scale(0.99);
   transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-  max-height: 90vh; overflow-y: auto;
+  max-height: 90%; overflow-y: auto;
 }
 .modal-overlay.open .modal { transform: translateY(0) scale(1); }
 
@@ -986,14 +1008,156 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   color: var(--ink-4);
 }
 
-/* Thin divider separating a category's core fields from its optional
-   target fields, so the target section reads as a distinct, skippable
-   add-on rather than part of the required setup. */
-.field-sep {
-  height: 1px;
-  background: var(--border-soft);
+/* ════════════════════════════════
+   OPTIONAL TARGET SECTION
+   A category's savings target is fully optional, so instead of just
+   labelling it "(optional)" next to required-looking fields, it lives
+   inside its own collapsed, dashed-border box — closed by default, opened
+   only on request (or already open when editing a category that has one).
+   The fields inside are visually and structurally separate from the core
+   name/allocation fields above.
+════════════════════════════════ */
+.target-section {
+  border: 1px dashed var(--border-hard);
+  border-radius: var(--r-sm);
   margin: 4px 0 16px;
+  overflow: hidden;
+  background: transparent;
+  transition: background var(--t), border-color var(--t);
 }
+.target-toggle {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  font-family: var(--font); font-size: 12.5px; font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color var(--t), background var(--t);
+}
+.target-toggle:hover { color: var(--ink-2); background: var(--surface-2); }
+.target-toggle-caret {
+  font-size: 10px; color: var(--ink-4);
+  transition: transform var(--t);
+}
+.target-section.open .target-toggle-caret { transform: rotate(180deg); }
+.target-section.open .target-toggle {
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--border-soft);
+}
+.target-fields {
+  display: none;
+  padding: 14px 12px 2px;
+}
+.target-section.open .target-fields { display: block; }
+.target-clear-row { text-align: right; margin: -8px 0 14px; }
+.target-clear-btn {
+  font-family: var(--font); font-size: 11px; font-weight: 500;
+  color: var(--ink-3);
+  padding: 2px 4px;
+  transition: color var(--t);
+}
+.target-clear-btn:hover { color: var(--red); }
+
+
+/* ════════════════════════════════
+   MONTH / YEAR PICKER
+   Replaces the native <input type="month"> for target dates — the native
+   control (a) has no consistent way to jump across years, (b) allows
+   picking a date in the past for a forward-looking savings goal, and
+   (c) renders its popup with the OS's own light/dark styling regardless of
+   the app's theme. This is a click-to-open trigger with two independently
+   scrollable columns (months, years), themed like the rest of the app.
+════════════════════════════════ */
+.my-picker { position: relative; }
+.my-picker-trigger {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font); font-size: 13px; color: var(--ink);
+  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+}
+.my-picker-trigger:hover { border-color: var(--border-hard); }
+.my-picker-trigger.open {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+  background: var(--modal-bg);
+}
+.my-picker-label.placeholder { color: var(--ink-4); }
+.my-picker-caret { font-size: 10px; color: var(--ink-4); flex-shrink: 0; margin-left: 8px; }
+
+.my-picker-popup {
+  position: absolute;
+  top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--modal-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 60;
+  padding: 8px;
+}
+.my-picker-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.my-picker-col {
+  /* Deliberately not a clean multiple of the item height, so the last
+     visible row is always cut off mid-button — a much stronger "there's
+     more below" cue than a scrollbar alone, which some platforms hide
+     until you start dragging. */
+  max-height: 152px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 2px;
+  border-radius: var(--r-xs);
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-4) var(--surface-2);
+  /* Scroll shadows: a soft fade at whichever edge still has content past
+     it. The "local" layer masks the content right up to the edge; the
+     "scroll" layer is the shadow itself, which only peeks out once the
+     content has actually scrolled away from that edge. */
+  background-image:
+    linear-gradient(to bottom, var(--modal-bg) 40%, rgba(0,0,0,0)),
+    linear-gradient(to top, var(--modal-bg) 40%, rgba(0,0,0,0)),
+    linear-gradient(to bottom, var(--ink-4) 0%, rgba(0,0,0,0) 100%),
+    linear-gradient(to top, var(--ink-4) 0%, rgba(0,0,0,0) 100%);
+  background-repeat: no-repeat;
+  background-color: var(--modal-bg);
+  background-position: top, bottom, top, bottom;
+  background-size: 100% 18px, 100% 18px, 100% 6px, 100% 6px;
+  background-attachment: local, local, scroll, scroll;
+}
+.my-picker-col::-webkit-scrollbar { width: 6px; }
+.my-picker-col::-webkit-scrollbar-track { background: var(--surface-2); border-radius: 3px; }
+.my-picker-col::-webkit-scrollbar-thumb { background: var(--ink-4); border-radius: 3px; }
+.my-picker-col::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+.my-picker-item {
+  width: 100%; text-align: left;
+  padding: 7px 10px;
+  flex-shrink: 0;
+  border-radius: var(--r-xs);
+  font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--ink);
+  transition: background var(--t), color var(--t);
+}
+.my-picker-item:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+.my-picker-item.active {
+  background: var(--accent-dim); color: var(--accent); font-weight: 600;
+}
+.my-picker-item:disabled { color: var(--ink-4); cursor: default; }
+
+.my-picker-clear {
+  width: 100%; margin-top: 8px;
+  padding: 8px 0;
+  text-align: center;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--font); font-size: 11.5px; font-weight: 500;
+  color: var(--ink-3);
+  transition: color var(--t);
+}
+.my-picker-clear:hover { color: var(--red); }
 
 /* Description autocomplete dropdown */
 .autocomplete-list {
@@ -1060,6 +1224,7 @@ html[data-theme="dark"] .btn-confirm:hover { background: var(--accent-h); }
   letter-spacing: 0.01em;
 }
 .btn-danger:hover { background: #a83a2d; }
+html[data-theme="dark"] .btn-danger:hover { background: #c9584a; }
 
 
 /* ─── Income distribution preview ─── */
@@ -1125,7 +1290,7 @@ html[data-theme="dark"] .btn-confirm:hover { background: var(--accent-h); }
   position: fixed; bottom: 24px; right: 24px;
   background: var(--ink);
   color: var(--bg);
-  padding: 10px 17px;
+  padding: 10px 12px 10px 17px;
   border-radius: var(--r-sm);
   font-family: var(--font); font-size: 12.5px; font-weight: 500;
   letter-spacing: 0.01em;
@@ -1134,9 +1299,24 @@ html[data-theme="dark"] .btn-confirm:hover { background: var(--accent-h); }
   transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.18s ease, background var(--t), color var(--t);
   z-index: 300;
   pointer-events: none;
-  max-width: 260px;
+  max-width: 300px;
+  display: flex; align-items: center; gap: 4px;
 }
 .toast.show { transform: translateY(0); opacity: 1; }
+.toast.with-action { pointer-events: auto; }
+.toast-msg { flex: 1; }
+.toast-undo {
+  flex-shrink: 0;
+  color: var(--accent-h);
+  font-family: var(--font); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 5px 8px;
+  border-radius: var(--r-xs);
+  transition: background var(--t);
+}
+html[data-theme="dark"] .toast-undo { color: var(--accent); }
+.toast-undo:hover { background: rgba(255,255,255,0.14); }
+html[data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.14); }
 
 /* ════════════════════════════════
    SAVE ERROR BANNER (persistent — does not auto-hide)

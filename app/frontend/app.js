@@ -546,6 +546,7 @@ function closeAllMenus() {
   document.querySelectorAll('.cat-menu-popup').forEach(p => p.style.display = 'none');
   openMenuCatId = null;
   closeSettingsPopup();
+  closeAllMonthYearPickers();
 }
 document.addEventListener('click', () => closeAllMenus());
 
@@ -936,15 +937,12 @@ function openModal(type, data) {
       <div class="field"><label>Allocation %</label>
         <input id="mc-pct" type="number" min="1" max="${rem}" placeholder="${rem}" /></div>
       <div class="modal-note" id="allocFeedback">${used}% allocated — ${rem}% remaining</div>
-      <div class="field-sep"></div>
-      <div class="field"><label>Target amount <span class="field-optional">(optional)</span></label>
-        <input id="mc-target" type="number" min="0" step="0.01" placeholder="e.g. 5000" /></div>
-      <div class="field"><label>Target date <span class="field-optional">(optional)</span></label>
-        <input id="mc-target-date" type="month" /></div>
+      ${targetSectionHtml('mc', null, null)}
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-confirm" onclick="addCategory()">Add</button>
       </div>`;
+    initMonthYearPicker('mc', null);
 
   // ── Edit category (name + %) ──
   } else if (type === 'edit-category') {
@@ -959,15 +957,12 @@ function openModal(type, data) {
       <div class="field"><label>Allocation %</label>
         <input id="ec-pct" type="number" min="1" max="${maxPct}" value="${cat.pct}" /></div>
       <div class="modal-note">Max available: ${maxPct}%</div>
-      <div class="field-sep"></div>
-      <div class="field"><label>Target amount <span class="field-optional">(optional)</span></label>
-        <input id="ec-target" type="number" min="0" step="0.01" placeholder="e.g. 5000" value="${cat.target != null ? cat.target : ''}" /></div>
-      <div class="field"><label>Target date <span class="field-optional">(optional)</span></label>
-        <input id="ec-target-date" type="month" value="${cat.targetDate || ''}" /></div>
+      ${targetSectionHtml('ec', cat.target, cat.targetDate)}
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-confirm" onclick="saveEditCategory('${cat.id}')">Save</button>
       </div>`;
+    initMonthYearPicker('ec', cat.targetDate || null);
 
   // ── Confirm delete category ──
   } else if (type === 'confirm-delete-category') {
@@ -1251,11 +1246,202 @@ function addDirectExpense(catId) {
   showSuccessToast(`−${fmtMoney(amount)} logged`);
 }
 
+// Removing a transaction is destructive and one click away (no confirm
+// dialog, by design — that would slow down every accidental miss-tap AND
+// every deliberate delete). Instead, the delete happens immediately but is
+// trivially reversible: we hang onto the removed row (and where it was)
+// and offer an "Undo" action right on the confirmation toast.
+let lastDeletedTransaction = null;
+
 function deleteTransaction(e, id) {
   e.stopPropagation();
-  state.transactions = state.transactions.filter(t => t.id !== id);
+  const index = state.transactions.findIndex(t => t.id === id);
+  if (index === -1) return;
+  const [removed] = state.transactions.splice(index, 1);
+  lastDeletedTransaction = { txn: removed, index };
   render();
-  showSuccessToast('Transaction removed');
+  showSuccessUndoToast('Transaction removed', undoDeleteTransaction);
+}
+
+function undoDeleteTransaction() {
+  if (!lastDeletedTransaction) return;
+  const { txn, index } = lastDeletedTransaction;
+  const insertAt = Math.min(index, state.transactions.length);
+  state.transactions.splice(insertAt, 0, txn);
+  lastDeletedTransaction = null;
+  render();
+  pulseCards([txn.catId]);
+  showSuccessToast('Transaction restored');
+}
+
+// ─── OPTIONAL TARGET SECTION (markup) ───
+// Builds the collapsible "savings target" box shared by the add- and
+// edit-category modals. It renders closed by default — a category's
+// target amount/date is entirely opt-in, so instead of a "(optional)"
+// label bolted onto fields that otherwise look required, the fields live
+// inside their own dashed-border box the user has to deliberately open.
+// When editing a category that already has a target, the box starts open
+// so the existing value isn't hidden from the user.
+function targetSectionHtml(prefix, targetAmount, targetDate) {
+  const hasTarget = targetAmount != null && targetAmount > 0;
+  return `
+    <div class="target-section${hasTarget ? ' open' : ''}" id="${prefix}-target-section">
+      <button type="button" class="target-toggle" onclick="toggleTargetSection('${prefix}')">
+        <span>${hasTarget ? 'Savings target' : '+ Add a savings target'}</span>
+        <span class="target-toggle-caret">▾</span>
+      </button>
+      <div class="target-fields">
+        <div class="field"><label>Target amount</label>
+          <input id="${prefix}-target" type="number" min="0" step="0.01" placeholder="e.g. 5000"
+            value="${targetAmount != null ? targetAmount : ''}" /></div>
+        <div class="field"><label>Target date</label>
+          <div class="my-picker">
+            <button type="button" class="my-picker-trigger" id="${prefix}-target-date-trigger"
+              onclick="toggleMonthYearPicker(event,'${prefix}')">
+              <span class="my-picker-label placeholder" id="${prefix}-target-date-label">No date set</span>
+              <span class="my-picker-caret">▾</span>
+            </button>
+            <input type="hidden" id="${prefix}-target-date" value="${targetDate || ''}" />
+            <div class="my-picker-popup" id="${prefix}-target-date-popup" style="display:none" onclick="event.stopPropagation()">
+              <div class="my-picker-cols">
+                <div class="my-picker-col" id="${prefix}-target-date-months"></div>
+                <div class="my-picker-col" id="${prefix}-target-date-years"></div>
+              </div>
+              <button type="button" class="my-picker-clear" onclick="clearMonthYear('${prefix}')">Clear date</button>
+            </div>
+          </div>
+        </div>
+        <div class="target-clear-row">
+          <button type="button" class="target-clear-btn" onclick="clearTargetSection('${prefix}')">Remove target</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleTargetSection(prefix) {
+  const wrap = document.getElementById(prefix + '-target-section');
+  if (wrap) wrap.classList.toggle('open');
+}
+
+// Clears both the amount input and the picked date, and collapses the box
+// back closed — a quick way to fully back out of setting a target.
+function clearTargetSection(prefix) {
+  const amountEl = document.getElementById(prefix + '-target');
+  if (amountEl) amountEl.value = '';
+  clearMonthYear(prefix);
+  const wrap = document.getElementById(prefix + '-target-section');
+  if (wrap) {
+    wrap.classList.remove('open');
+    const toggleLabel = wrap.querySelector('.target-toggle span');
+    if (toggleLabel) toggleLabel.textContent = '+ Add a savings target';
+  }
+}
+
+// ─── MONTH / YEAR PICKER (target date) ───
+// Replaces the native <input type="month">: lets the user jump straight to
+// any year (not just step one month at a time), can't be set to a month
+// that's already passed, and is themed like the rest of the app instead of
+// falling back to the OS's native (often light-only) date UI.
+const myPickerState = {};
+
+function fmtMonthYearShort(y, m) {
+  return MONTHS[m - 1].slice(0, 3) + ' ' + y;
+}
+
+function initMonthYearPicker(prefix, initialYM) {
+  const now = new Date();
+  let y = now.getFullYear(), m = now.getMonth() + 1;
+  if (initialYM) {
+    const parts = initialYM.split('-').map(Number);
+    if (parts[0] && parts[1]) { y = parts[0]; m = parts[1]; }
+  }
+  myPickerState[prefix] = { y, m, set: !!initialYM };
+  renderMonthYearPicker(prefix);
+  updateMonthYearLabel(prefix);
+}
+
+function renderMonthYearPicker(prefix) {
+  const st = myPickerState[prefix];
+  if (!st) return;
+  const now = new Date();
+  const curY = now.getFullYear(), curM = now.getMonth() + 1;
+
+  const monthsCol = document.getElementById(prefix + '-target-date-months');
+  const yearsCol  = document.getElementById(prefix + '-target-date-years');
+  if (!monthsCol || !yearsCol) return;
+
+  monthsCol.innerHTML = MONTHS.map((name, idx) => {
+    const mNum = idx + 1;
+    const disabled = (st.y === curY && mNum < curM);
+    const active = st.set && st.m === mNum;
+    return `<button type="button" class="my-picker-item${active ? ' active' : ''}" ${disabled ? 'disabled' : ''}
+      onclick="pickMonthYear('${prefix}','m',${mNum})">${name.slice(0, 3)}</button>`;
+  }).join('');
+
+  const years = [];
+  for (let yy = curY; yy <= curY + 20; yy++) years.push(yy);
+  yearsCol.innerHTML = years.map(yy => {
+    const active = st.set && st.y === yy;
+    return `<button type="button" class="my-picker-item${active ? ' active' : ''}"
+      onclick="pickMonthYear('${prefix}','y',${yy})">${yy}</button>`;
+  }).join('');
+}
+
+function pickMonthYear(prefix, kind, value) {
+  const st = myPickerState[prefix];
+  if (!st) return;
+  if (kind === 'm') st.m = value; else st.y = value;
+  st.set = true;
+  // Never allow landing back in the past: if the newly-picked year makes
+  // the currently-picked month already gone by, bump the month forward.
+  const now = new Date();
+  const curY = now.getFullYear(), curM = now.getMonth() + 1;
+  if (st.y === curY && st.m < curM) st.m = curM;
+  renderMonthYearPicker(prefix);
+  updateMonthYearLabel(prefix);
+}
+
+function clearMonthYear(prefix) {
+  const st = myPickerState[prefix];
+  if (!st) return;
+  st.set = false;
+  renderMonthYearPicker(prefix);
+  updateMonthYearLabel(prefix);
+}
+
+function updateMonthYearLabel(prefix) {
+  const st = myPickerState[prefix];
+  const labelEl  = document.getElementById(prefix + '-target-date-label');
+  const hiddenEl = document.getElementById(prefix + '-target-date');
+  if (!st || !labelEl || !hiddenEl) return;
+  if (st.set) {
+    labelEl.textContent = fmtMonthYearShort(st.y, st.m);
+    labelEl.classList.remove('placeholder');
+    hiddenEl.value = st.y + '-' + String(st.m).padStart(2, '0');
+  } else {
+    labelEl.textContent = 'No date set';
+    labelEl.classList.add('placeholder');
+    hiddenEl.value = '';
+  }
+}
+
+function toggleMonthYearPicker(e, prefix) {
+  e.stopPropagation();
+  const popup   = document.getElementById(prefix + '-target-date-popup');
+  const trigger = document.getElementById(prefix + '-target-date-trigger');
+  if (!popup) return;
+  const isOpen = popup.style.display === 'block';
+  closeAllMonthYearPickers();
+  if (!isOpen) {
+    popup.style.display = 'block';
+    if (trigger) trigger.classList.add('open');
+    const activeEl = popup.querySelector('.my-picker-item.active');
+    if (activeEl) activeEl.scrollIntoView({ block: 'center' });
+  }
+}
+function closeAllMonthYearPickers() {
+  document.querySelectorAll('.my-picker-popup').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.my-picker-trigger.open').forEach(t => t.classList.remove('open'));
 }
 
 // ─── CATEGORY ACTIONS ───
@@ -1328,12 +1514,44 @@ function deleteCategory(catId) {
 }
 
 // ─── TOAST ───
+let toastTimer = null;
+let pendingUndoAction = null;
+
 function showToast(msg) {
+  pendingUndoAction = null;
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  t.innerHTML = `<span class="toast-msg">${escHtml(msg)}</span>`;
+  t.classList.remove('with-action');
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
+
+// Same as showToast, but with a clickable "Undo" action attached. Only one
+// undo-able toast is tracked at a time — a new one (of either kind)
+// replaces it, same as the old toast just replacing its text.
+function showUndoToast(msg, undoFn) {
+  pendingUndoAction = undoFn;
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span class="toast-msg">${escHtml(msg)}</span>
+    <button class="toast-undo" onclick="event.stopPropagation(); runPendingUndo()">Undo</button>`;
+  t.classList.add('show', 'with-action');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.classList.remove('show', 'with-action');
+    pendingUndoAction = null;
+  }, 6000);
+}
+
+function runPendingUndo() {
+  const fn = pendingUndoAction;
+  pendingUndoAction = null;
+  const t = document.getElementById('toast');
+  clearTimeout(toastTimer);
+  t.classList.remove('show', 'with-action');
+  if (fn) fn();
+}
+
 // Use this (instead of showToast) for messages that confirm data was saved.
 // Call this AFTER render(). It awaits the save that render() just kicked
 // off, so the toast only ever appears once the write actually completed. If
@@ -1343,6 +1561,13 @@ function showToast(msg) {
 async function showSuccessToast(msg) {
   const ok = await pendingSave;
   if (ok) showToast(msg);
+}
+
+// Same await-then-show contract as showSuccessToast, but shows the
+// undo-able variant.
+async function showSuccessUndoToast(msg, undoFn) {
+  const ok = await pendingSave;
+  if (ok) showUndoToast(msg, undoFn);
 }
 
 // ─── INIT ───
