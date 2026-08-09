@@ -163,6 +163,16 @@ function allDescriptions() {
   return out;
 }
 
+// Net balance a category has ever held — every income and expense logged
+// against it, across all months, not just the one currently in view. This
+// is the number shown against a category's target: spending from the
+// category reduces it, same as it reduces the on-screen running balance.
+function categoryTargetProgress(catId) {
+  return state.transactions
+    .filter(t => t.catId === catId)
+    .reduce((s, t) => s + t.amount, 0);
+}
+
 // Find a pinned income whose name matches a typed description (case-insensitive)
 function findPinnedIncomeByDesc(desc) {
   const norm = (desc || '').trim().toLowerCase();
@@ -363,6 +373,8 @@ function renderCategories() {
         </div>`;
     }
 
+    const targetHtml = renderCategoryTarget(cat);
+
     return `
       <div class="cat-card" id="card-${cat.id}">
         <div class="cat-header">
@@ -386,6 +398,7 @@ function renderCategories() {
           </div>
         </div>
         ${spendBarHtml}
+        ${targetHtml}
 
         <div class="cat-table">
           <div class="table-head-primary">
@@ -422,6 +435,38 @@ function renderCategories() {
 
   // Scroll each table body to the latest entry
   document.querySelectorAll('.table-body').forEach(b => { b.scrollTop = b.scrollHeight; });
+}
+
+// Formats a stored 'YYYY-MM' target date as e.g. "Dec 2026" for display.
+// Purely informational — never used to judge progress against the target.
+function fmtTargetDate(ym) {
+  if (!ym) return '';
+  const [y, m] = ym.split('-').map(Number);
+  if (!y || !m || m < 1 || m > 12) return '';
+  return MONTHS[m - 1].slice(0, 3) + ' ' + y;
+}
+
+// Renders a category's target progress: current all-time net balance vs.
+// the target amount, as a plain "X / Y · Z%" line + bar. Nothing shows if
+// no target is set — a category without a target renders exactly as it
+// always has.
+function renderCategoryTarget(cat) {
+  if (cat.target == null || cat.target <= 0) return '';
+  const progress = categoryTargetProgress(cat.id);
+  const pct = Math.max(0, Math.min(100, (progress / cat.target) * 100));
+  const reached = progress >= cat.target;
+  const dateLabel = fmtTargetDate(cat.targetDate);
+  return `
+    <div class="cat-target-wrap">
+      <div class="cat-target-row">
+        <span class="cat-target-amounts">${fmtMoney(Math.max(0, progress))} / ${fmtMoney(cat.target)}</span>
+        <span class="cat-target-pct${reached ? ' reached' : ''}">${Math.round(pct)}%</span>
+      </div>
+      <div class="cat-target-bar-wrap">
+        <div class="cat-target-bar-fill${reached ? ' reached' : ''}" style="width:${pct}%"></div>
+      </div>
+      ${dateLabel ? `<div class="cat-target-date">Target date: ${dateLabel}</div>` : ''}
+    </div>`;
 }
 
 // Renders the Unallocated bucket as its own card in the main grid — same
@@ -891,6 +936,11 @@ function openModal(type, data) {
       <div class="field"><label>Allocation %</label>
         <input id="mc-pct" type="number" min="1" max="${rem}" placeholder="${rem}" /></div>
       <div class="modal-note" id="allocFeedback">${used}% allocated — ${rem}% remaining</div>
+      <div class="field-sep"></div>
+      <div class="field"><label>Target amount <span class="field-optional">(optional)</span></label>
+        <input id="mc-target" type="number" min="0" step="0.01" placeholder="e.g. 5000" /></div>
+      <div class="field"><label>Target date <span class="field-optional">(optional)</span></label>
+        <input id="mc-target-date" type="month" /></div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-confirm" onclick="addCategory()">Add</button>
@@ -909,6 +959,11 @@ function openModal(type, data) {
       <div class="field"><label>Allocation %</label>
         <input id="ec-pct" type="number" min="1" max="${maxPct}" value="${cat.pct}" /></div>
       <div class="modal-note">Max available: ${maxPct}%</div>
+      <div class="field-sep"></div>
+      <div class="field"><label>Target amount <span class="field-optional">(optional)</span></label>
+        <input id="ec-target" type="number" min="0" step="0.01" placeholder="e.g. 5000" value="${cat.target != null ? cat.target : ''}" /></div>
+      <div class="field"><label>Target date <span class="field-optional">(optional)</span></label>
+        <input id="ec-target-date" type="month" value="${cat.targetDate || ''}" /></div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         <button class="btn-confirm" onclick="saveEditCategory('${cat.id}')">Save</button>
@@ -1204,6 +1259,27 @@ function deleteTransaction(e, id) {
 }
 
 // ─── CATEGORY ACTIONS ───
+// Reads and validates the optional target amount + target date inputs for
+// a given field-id prefix (e.g. 'mc' or 'ec'). Both are optional — leaving
+// either blank means "no target," same as a category has always behaved.
+// Returns null on invalid (non-blank but bad) input so the caller can bail
+// out with a toast, same pattern as the other field validations here.
+function readOptionalTarget(prefix) {
+  const amountEl = document.getElementById(prefix + '-target');
+  const dateEl   = document.getElementById(prefix + '-target-date');
+  const amountRaw = amountEl ? amountEl.value.trim() : '';
+  const dateRaw   = dateEl ? dateEl.value.trim() : '';
+
+  let target = null;
+  if (amountRaw !== '') {
+    const n = parseFloat(amountRaw);
+    if (isNaN(n) || n <= 0) return { error: 'Enter a valid target amount.' };
+    target = n;
+  }
+  const targetDate = dateRaw !== '' ? dateRaw : null; // 'YYYY-MM' from <input type=month>, informational only
+  return { target, targetDate };
+}
+
 function addCategory() {
   const name = document.getElementById('mc-name').value.trim();
   const pct  = parseInt(document.getElementById('mc-pct').value);
@@ -1211,7 +1287,9 @@ function addCategory() {
   if (!name) { showToast('Enter a name.'); return; }
   if (isNaN(pct) || pct < 1) { showToast('Enter a percentage (min 1%).'); return; }
   if (used + pct > 100) { showToast(`Only ${100-used}% remaining.`); return; }
-  state.categories.push({ id: 'cat_' + state.nextId++, name, pct });
+  const t = readOptionalTarget('mc');
+  if (t.error) { showToast(t.error); return; }
+  state.categories.push({ id: 'cat_' + state.nextId++, name, pct, target: t.target, targetDate: t.targetDate });
   closeModal(); render();
   showSuccessToast(`"${name}" added (${pct}%)`);
 }
@@ -1225,8 +1303,12 @@ function saveEditCategory(catId) {
   if (!name) { showToast('Enter a name.'); return; }
   if (isNaN(pct) || pct < 1) { showToast('Enter a valid percentage.'); return; }
   if (usedExcl + pct > 100) { showToast(`Max ${100-usedExcl}% for this category.`); return; }
+  const t = readOptionalTarget('ec');
+  if (t.error) { showToast(t.error); return; }
   cat.name = name;
   cat.pct  = pct;
+  cat.target = t.target;
+  cat.targetDate = t.targetDate;
   closeModal(); render();
   showSuccessToast(`Category updated`);
 }

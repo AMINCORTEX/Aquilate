@@ -720,6 +720,48 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 }
 .cat-spend-bar-fill.over { background: var(--red); }
 
+/* Target progress — a category's optional savings goal. All-time net
+   balance vs. target, shown plainly as "X / Y · Z%" plus a bar. Uses
+   --green (not --accent) so it reads as a distinct, separate signal from
+   the monthly spend bar above it. */
+.cat-target-wrap {
+  margin: 0 20px 14px;
+  flex-shrink: 0;
+}
+.cat-target-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 5px;
+}
+.cat-target-amounts {
+  font-family: var(--font-mono);
+  font-size: 11.5px; color: var(--ink-2);
+  letter-spacing: 0.01em;
+}
+.cat-target-pct {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500; color: var(--green);
+}
+.cat-target-pct.reached { color: var(--green); font-weight: 700; }
+.cat-target-bar-wrap {
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.cat-target-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green);
+  width: 0%;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cat-target-bar-fill.reached { background: var(--green); }
+.cat-target-date {
+  font-family: var(--font-mono);
+  font-size: 10px; color: var(--ink-3);
+  margin-top: 4px;
+}
+
 /* Pulse feedback when a new entry lands in this card */
 @keyframes cardJustLogged {
   0%   { box-shadow: var(--shadow-xs); }
@@ -936,6 +978,21 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
   background: var(--modal-bg);
+}
+.field-optional {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--ink-4);
+}
+
+/* Thin divider separating a category's core fields from its optional
+   target fields, so the target section reads as a distinct, skippable
+   add-on rather than part of the required setup. */
+.field-sep {
+  height: 1px;
+  background: var(--border-soft);
+  margin: 4px 0 16px;
 }
 
 /* Description autocomplete dropdown */
