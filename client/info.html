@@ -53,6 +53,17 @@
     .hiw-result-quote p { font-size: clamp(1.25rem, 3vw, 1.5rem); font-weight: 400; color: var(--text-1); line-height: 1.4; letter-spacing: -0.01em; }
     .hiw-result-quote p + p { margin-top: 6px; color: var(--text-3); font-size: clamp(1rem, 2vw, 1.125rem); }
 
+    /* ─── WORKSPACE FEATURES (light weight) ─── */
+    .hiw-feature-intro { font-size: 0.875rem; color: var(--text-3); line-height: 1.6; max-width: 560px; margin-bottom: 2rem; }
+    .hiw-feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .hiw-feature-item {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 0.9rem 1.1rem;
+    }
+    .hiw-feature-item h4 { font-size: 0.812rem; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+    .hiw-feature-item p { font-size: 0.75rem; color: var(--text-3); line-height: 1.45; }
+    @media (max-width: 640px) { .hiw-feature-grid { grid-template-columns: 1fr; } }
+
     @media (max-width: 640px) {
       .hiw-inner { padding: 0 1rem; }
       .hiw-hero { padding: 3rem 1rem 2rem; }
@@ -81,9 +92,9 @@
     <div class="hiw-scroll-area">
       <section class="hiw-hero hiw-inner" aria-label="Introduction">
         <span class="hiw-eyebrow">How it works</span>
-        <h1>The mechanic<br><em>behind Aquilate.</em></h1>
+        <h1>How does<br><em>Aquilate work?</em></h1>
         <p class="hiw-positioning">
-          Aquilate is designed for people who want to control money before they spend it, not analyze it after.
+          Aquilate is designed for people who want an offline tool to control their money without overspending.
         </p>
         <div class="hiw-concept-bar" aria-label="Core loop">
           <span class="hiw-concept-node">Income</span>
@@ -101,7 +112,7 @@
           <div class="hiw-body">
             <p>Money arrives and sits in a single account. There are no boundaries. Nothing stops you from spending savings on impulse purchases.</p>
             <p><strong>Small expenses accumulate silently. The pool empties.</strong></p>
-            <p>Not because you spent too much on one thing — but because the system had no categories, no divisions, no visual separation of purpose.</p>
+            <p>Not because you spent too much on one thing, but because you didn't have clear purposes, no divisions and no visual separation.</p>
           </div>
         </section>
 
@@ -111,7 +122,7 @@
           <p class="section-label">02 &nbsp; The Aquilate mechanic</p>
           <h2 id="hiw-mechanism">Allocation before spending.</h2>
           <div class="hiw-body">
-            <p>Money does not sit in a single pool. The moment income is logged, it is divided across categories according to your predefined percentages.</p>
+            <p>Money does not sit in a single place. The moment income is logged, it is divided across categories according to your predefined percentages.</p>
           </div>
           <div class="hiw-callout">
             <ul class="hiw-callout-list">
@@ -127,8 +138,47 @@
 
         <hr class="hiw-rule">
 
+        <section class="hiw-section" aria-labelledby="hiw-privacy">
+          <p class="section-label">03 &nbsp; What about my data?</p>
+          <h2 id="hiw-privacy">Nothing about your money leaves your device.</h2>
+          <div class="hiw-body">
+            <p>Aquilate doesn't have a login screen, because it doesn't have accounts. There's no server behind it, so there's nothing for your finances to sync to.</p>
+            <p>Every category, transaction, and target lives in local storage on the device you're using. Because its your data.</p>
+          </div>
+          <div class="hiw-callout">
+            <ul class="hiw-callout-list">
+              <li>Works fully offline</li>
+              <li>No email required</li>
+            </ul>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
+        <section class="hiw-section" aria-labelledby="hiw-safety">
+          <p class="section-label">04 &nbsp; Keeping it safe</p>
+          <h2 id="hiw-safety">Private, but not weak.</h2>
+          <div class="hiw-body">
+            <p>A device can still get lost, reset, or replaced. Aquilate lets you export your full history at any time, so switching devices doesn't mean starting over.</p>
+            <p>Back up when you want, restore when you need to. Your records outlast the device they were created on.</p>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
+        <section class="hiw-section" aria-labelledby="hiw-targets">
+          <p class="section-label">05 &nbsp; Setting targets</p>
+          <h2 id="hiw-targets">A category can have a goal, not just a balance.</h2>
+          <div class="hiw-body">
+            <p>Any category can carry a target amount or a savings goal, a spending limit — shown next to its running balance.</p>
+            <p>Aquilate tracks progress toward that number month by month, so a category shows not just where money went, but where it's headed.</p>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
         <section class="hiw-section" aria-labelledby="hiw-loop">
-          <p class="section-label">03 &nbsp; The core loop</p>
+          <p class="section-label">06 &nbsp; The core loop</p>
           <h2 id="hiw-loop">Four steps. Repeated every month.</h2>
           <div class="hiw-loop">
             <div class="hiw-loop-step">
@@ -165,7 +215,7 @@
         <hr class="hiw-rule">
 
         <section class="hiw-section" aria-labelledby="hiw-result">
-          <p class="section-label">04 &nbsp; The result</p>
+          <p class="section-label">07 &nbsp; The result</p>
           <h2 id="hiw-result">Discipline without complexity.</h2>
           <div class="hiw-body">
             <p>Aquilate does not try to teach you finance. It creates an environment where intentional spending becomes the default, because the structure makes unintentional spending visible.</p>
@@ -174,6 +224,52 @@
           <div class="hiw-result-quote">
             <p>Money stops feeling chaotic.</p>
             <p>It becomes allocated — by design.</p>
+          </div>
+        </section>
+
+        <hr class="hiw-rule">
+
+        <section class="hiw-section" aria-labelledby="hiw-workspace">
+          <p class="section-label">08 &nbsp; Everyday workspace</p>
+          <h2 id="hiw-workspace">The rest of what's in the app.</h2>
+          <p class="hiw-feature-intro">Beyond how allocation works, Aquilate includes the ordinary tools any budgeting workspace needs day to day.</p>
+          <div class="hiw-feature-grid">
+            <div class="hiw-feature-item">
+              <h4>Categories</h4>
+              <p>Create as many spending buckets as you need, named however makes sense to you.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Category settings</h4>
+              <p>Adjust percentages, colors, and targets for each category at any time.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Pinned incomes</h4>
+              <p>Save recurring income sources so logging next month's paycheck takes one tap.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Income logging</h4>
+              <p>Record any amount that comes in, whenever it arrives.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Expense logging</h4>
+              <p>Log a purchase against the category it belongs to in seconds.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Automatic income division</h4>
+              <p>Every income entry is split across categories the moment it's logged.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Monthly navigation</h4>
+              <p>Move between months to compare how allocation played out over time.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Transaction history</h4>
+              <p>A full, searchable ledger of everything logged, per category.</p>
+            </div>
+            <div class="hiw-feature-item">
+              <h4>Backups &amp; export</h4>
+              <p>Export your full history so a device reset never means losing your records.</p>
+            </div>
           </div>
         </section>
       </div>

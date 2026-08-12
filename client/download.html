@@ -44,7 +44,7 @@
 
     .download-buttons {
       display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: center; margin-bottom: 16px; width: 100%;
+      justify-content: center; margin-bottom: 36px; width: 100%;
       animation: fadeUp 0.4s 0.18s ease both;
     }
 
@@ -58,17 +58,6 @@
     }
     .download-btn:hover { background: var(--bg-3); border-color: var(--brand-2); color: var(--brand-2); }
     .download-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-    .secondary-links {
-      display: flex; gap: 24px; justify-content: center;
-      margin-bottom: 28px;
-      animation: fadeUp 0.4s 0.24s ease both;
-    }
-    .secondary-links a {
-      color: var(--text-3); text-decoration: underline; text-underline-offset: 2px;
-      transition: color 0.2s; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.03em;
-    }
-    .secondary-links a:hover { color: var(--text-1); }
 
     .version-info {
       font-family: var(--font-mono); font-size: 10px; color: var(--text-4);
@@ -120,11 +109,6 @@
             <svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg>
             Windows
           </a>
-        </div>
-
-        <div class="secondary-links">
-          <a href="#">Release Notes</a>
-          <a href="#">System Requirements</a>
         </div>
 
         <div class="version-info">
