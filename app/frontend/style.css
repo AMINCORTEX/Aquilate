@@ -181,29 +181,6 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 }
 .logo-icon img { width: 28px; height: 28px; object-fit: cover; }
 
-/* Nav */
-.topbar-nav { display: flex; gap: 2px; }
-
-.nav-btn {
-  padding: 5px 2px;
-  font-family: var(--font);
-  font-size: 13px; font-weight: 500;
-  color: var(--ink-3);
-  letter-spacing: 0.01em;
-  text-decoration: underline;
-  text-decoration-color: var(--border-hard);
-  text-underline-offset: 4px;
-  cursor: default;
-  background: none;
-  border-radius: 0;
-  box-shadow: none;
-}
-.nav-btn.active {
-  background: none;
-  color: var(--ink-3);
-  box-shadow: none;
-}
-
 .topbar-right { display: flex; align-items: center; gap: 12px; position: relative; }
 
 /* Settings */
@@ -218,45 +195,6 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
   transition: background var(--t), color var(--t), border-color var(--t);
 }
 .settings-btn:hover { background: var(--surface-3); color: var(--ink); border-color: var(--border-hard); }
-
-.settings-panel {
-  position: absolute;
-  top: calc(100% + 6px); right: 0;
-  background: var(--modal-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  box-shadow: var(--shadow-md);
-  z-index: 250;
-  min-width: 190px;
-  padding: 13px;
-  display: none;
-}
-.settings-panel.open { display: block; }
-.settings-panel-title {
-  font-family: var(--font-mono);
-  font-size: 9px; font-weight: 500;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink-4);
-  margin-bottom: 9px;
-}
-.theme-options { display: flex; flex-direction: column; gap: 6px; }
-.theme-option {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  font-size: 13px; color: var(--ink-2);
-  cursor: pointer;
-  transition: background var(--t), color var(--t), border-color var(--t);
-}
-.theme-option:hover { background: var(--surface-3); }
-.theme-option.selected {
-  border-color: var(--accent);
-  color: var(--ink);
-  background: var(--accent-dim);
-}
-.theme-option input { accent-color: var(--accent); }
 
 /* Month nav */
 .month-nav {
@@ -312,14 +250,12 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 
 .sidebar-section {
   padding: 18px 18px;
-  border-bottom: 1px solid var(--border);
 }
-.sidebar-section:last-child { border-bottom: none; }
 
 /* Section label */
 .section-label {
   font-family: var(--font-mono);
-  font-size: 9px; font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -328,7 +264,7 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 }
 
 .section-add-btn {
-  font-size: 10.5px; font-weight: 500;
+  font-size: 11px; font-weight: 500;
   color: var(--ink-3);
   font-family: var(--font);
   text-transform: none; letter-spacing: 0;
@@ -339,10 +275,19 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 .section-add-btn:hover { color: var(--accent); background: var(--accent-dim); }
 
 
-/* ─── Pinned Incomes ─── */
+/* ─── Pinned Incomes ───
+   The one hairline kept in the sidebar: it separates the incomes list
+   (a scrollable list of items) from the Summary block right below it (a
+   numeric overview) — a genuine content-type shift, not a repeated
+   pattern that spacing alone could communicate. Every other section
+   below relies on spacing only, per the "space instead of borders"
+   principle. */
 .income-section-scroll {
   overflow-y: auto; min-height: 0;
   max-height: 150px;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
   scrollbar-width: thin;
   scrollbar-color: var(--border-hard) transparent;
 }
@@ -384,77 +329,72 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 }
 
 
-/* ─── Summary Block ─── */
-.summary-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 8px;
+/* ─── Summary Block ───
+   Per the document's own example: "Income $2,400 / Expenses $1,400" needs
+   no box around it — the spacing between the two stacks does the grouping
+   that a border used to do. Kept as two plain label/value columns. */
+.summary-plain {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 16px;
 }
-
-.summary-cell {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 12px 13px;
-}
-
-.summary-cell-label {
+.summary-plain-item { flex: 1; }
+.summary-plain-label {
   font-family: var(--font-mono);
-  font-size: 8.5px; font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--ink-3);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
-
-.summary-cell-val {
+.summary-plain-val {
   font-family: var(--font-mono);
-  font-size: 14.5px; font-weight: 500;
+  font-size: 14px; font-weight: 500;
   color: var(--ink);
   letter-spacing: -0.01em;
 }
-.summary-cell-val.pos { color: var(--green); }
-.summary-cell-val.neg { color: var(--red); }
+.summary-plain-val.pos { color: var(--green); }
 
-/* Balance row */
+/* Balance — the sidebar's one Level-1 figure. Everything above it (the
+   plain income/expense stacks) is supporting detail; this is the number
+   the whole sidebar exists to lead to, so it's the only place a solid
+   fill block is earned. */
 .balance-row {
   background: var(--ink);
   border-radius: var(--r);
-  padding: 13px 15px;
+  padding: 14px 16px;
   display: flex; align-items: center; justify-content: space-between;
 }
 html[data-theme="dark"] .balance-row { background: var(--accent); }
 .balance-row-label {
   font-family: var(--font-mono);
-  font-size: 8.5px; font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.55);
 }
 .balance-row-val {
   font-family: var(--font-mono);
-  font-size: 17px; font-weight: 500;
+  font-size: 20px; font-weight: 600;
   color: #fff;
   letter-spacing: -0.02em;
 }
 
 
-/* ─── Category Totals ─── */
-.cat-totals-list { display: flex; flex-direction: column; }
+/* ─── Category Totals ───
+   Allocation % is dropped here — it's static configuration, not month
+   data, and it's already shown on the category card itself; repeating it
+   in a list whose one job is "how did this category do this month" was
+   redundant density, not useful density. Borders removed in favor of
+   spacing (also matches the "one hairline, not one per row" policy). */
+.cat-totals-list { display: flex; flex-direction: column; gap: 2px; }
 
 .cat-total-row {
   display: flex; align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border-soft);
+  padding: 6px 0;
 }
-.cat-total-row:last-child { border-bottom: none; }
 
 .cat-total-name { font-size: 12px; color: var(--ink-2); font-weight: 500; flex: 1; }
-.cat-total-pct {
-  font-family: var(--font-mono); font-size: 9.5px;
-  color: var(--ink-4); margin: 0 10px;
-}
 .cat-total-val {
   font-family: var(--font-mono); font-size: 12px; font-weight: 500;
   color: var(--ink);
@@ -467,26 +407,13 @@ html[data-theme="dark"] .balance-row { background: var(--accent); }
 
 
 /* ─── Quick Actions ─── */
-.sidebar-actions { display: flex; flex-direction: column; gap: 6px; }
-
 .sidebar-action-btn {
   width: 100%; padding: 10px 14px;
   border-radius: var(--r-sm);
-  font-family: var(--font); font-size: 12.5px; font-weight: 500;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
   cursor: pointer; text-align: center; letter-spacing: 0.01em;
   transition: background var(--t), color var(--t), border-color var(--t);
 }
-.sidebar-action-primary {
-  background: var(--ink); color: #fff; border: none;
-}
-.sidebar-action-primary:hover { background: #000; }
-html[data-theme="dark"] .sidebar-action-primary { background: var(--accent); }
-html[data-theme="dark"] .sidebar-action-primary:hover { background: var(--accent-h); }
-.sidebar-action-secondary {
-  background: var(--surface-2); color: var(--ink-2);
-  border: 1px solid var(--border);
-}
-.sidebar-action-secondary:hover { background: var(--surface-3); color: var(--ink); border-color: var(--border-hard); }
 
 /* Tier 3 — infrequent/setup actions read as quiet, not competing with daily use */
 .sidebar-action-quiet {
@@ -511,46 +438,27 @@ html[data-theme="dark"] .sidebar-action-primary:hover { background: var(--accent
   background: var(--bg);
 }
 
-.topbar-actions {
-  display: flex; align-items: center; gap: 8px;
-}
+/* ── Tier-1 actions, promoted into the topbar (the two things done daily) ── */
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
 
 .toolbar-btn {
   padding: 9px 18px;
   border-radius: var(--r-sm);
   border: 1px solid var(--border);
   background: var(--surface-2);
-  font-family: var(--font); font-size: 13px; font-weight: 600;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
   color: var(--ink-2); cursor: pointer;
-  transition: background var(--t), color var(--t), border-color var(--t);
+  transition: background var(--t), color var(--t), border-color var(--t), transform 0.12s ease;
   letter-spacing: 0.01em;
 }
-.toolbar-btn:hover { background: var(--surface-3); color: var(--ink); border-color: var(--border-hard); }
+.toolbar-btn:hover { background: var(--surface-3); color: var(--ink); border-color: var(--border-hard); transform: translateY(-1px); }
+.toolbar-btn:active { transform: translateY(0); }
 .toolbar-btn.primary {
   background: var(--ink); color: #fff; border-color: var(--ink);
 }
 .toolbar-btn.primary:hover { background: #000; border-color: #000; }
 html[data-theme="dark"] .toolbar-btn.primary { background: var(--accent); border-color: var(--accent); }
 html[data-theme="dark"] .toolbar-btn.primary:hover { background: var(--accent-h); border-color: var(--accent-h); }
-
-/* ── Tier-1 actions, promoted into the topbar (the two things done daily) ── */
-.topbar-actions { display: flex; align-items: center; gap: 8px; }
-.topbar-action-btn {
-  padding: 9px 18px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border-hard);
-  background: var(--surface-2);
-  font-family: var(--font); font-size: 13px; font-weight: 600;
-  color: var(--ink); cursor: pointer;
-  transition: background var(--t), color var(--t), border-color var(--t), transform 0.12s ease;
-  letter-spacing: 0.01em;
-}
-.topbar-action-btn:hover { background: var(--surface-3); transform: translateY(-1px); }
-.topbar-action-btn:active { transform: translateY(0); }
-.topbar-action-btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
-.topbar-action-btn.primary:hover { background: #000; border-color: #000; }
-html[data-theme="dark"] .topbar-action-btn.primary { background: var(--accent); border-color: var(--accent); }
-html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--accent-h); border-color: var(--accent-h); }
 
 
 /* ════════════════════════════════
@@ -596,22 +504,13 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 }
 
 .grid-empty-hint {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   height: 100%; width: 100%;
   min-width: 100cqw;
-  gap: 8px;
-}
-.grid-empty-hint::before {
-  content: '';
-  display: block;
-  width: 30px; height: 30px;
-  border: 2px solid var(--border-hard);
-  border-radius: 50%;
-  opacity: 0.4;
 }
 .grid-empty-hint p,
 .grid-empty-hint {
-  color: var(--ink-3); font-size: 12.5px;
+  color: var(--ink-3); font-size: 13px;
 }
 
 
@@ -626,74 +525,21 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   border-radius: var(--r-xl);
   overflow: hidden;
   display: flex; flex-direction: column;
-  box-shadow: var(--shadow);
   height: 100%; min-height: 0;
   transition: border-color var(--t), box-shadow var(--t), opacity var(--t), transform var(--t);
 }
+/* Cards are genuinely independent content sitting side by side in a row —
+   a border earns its keep here. Shadow, per the reshape's "spend shadows
+   only on floating elements" rule, is reserved for the hover lift only,
+   not carried permanently at rest. */
 .cat-card:hover {
   border-color: var(--border-hard);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow);
 }
 
 /* Hide visible drag handles */
 .cat-drag-handle {
   display: none !important;
-}
-
-/* ─── Reorder controls ─── */
-.cat-edge {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 26px;
-  transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px;
-  z-index: 30;
-}
-.cat-edge-btn {
-  width: 19px; height: 19px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
-  background: var(--modal-bg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
-  color: var(--ink-3);
-  font-size: 10.5px; line-height: 1;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: opacity var(--t), transform var(--t), background var(--t), color var(--t), border-color var(--t);
-  pointer-events: none;
-  cursor: pointer;
-}
-.cat-edge-btn:first-child::before {
-  content: '>';
-}
-.cat-edge-btn:last-child::before {
-  content: '<';
-}
-.cat-edge:hover .cat-edge-btn {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
-}
-.cat-edge-btn:hover:not(:disabled) {
-  background: var(--surface-3);
-  color: var(--ink);
-  border-color: var(--border-hard);
-}
-.cat-edge-btn:disabled {
-  cursor: default;
-  pointer-events: none;
-}
-.cat-edge:hover .cat-edge-btn:disabled {
-  opacity: 0.3;
-}
-
-.cat-card:has(+ .cat-edge-mid:hover) {
-  transform: translateX(-5px);
-}
-.cat-edge-mid:hover + .cat-card {
-  transform: translateX(5px);
 }
 
 /* Card header */
@@ -703,26 +549,43 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 8px; flex-shrink: 0;
 }
-.cat-header-left { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 8px; }
+.cat-header-left { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
 
 .cat-name {
   font-family: var(--font);
   font-weight: 700;
   font-size: 16px; color: var(--ink);
-  display: block; margin-bottom: 2px;
   letter-spacing: -0.01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* Allocation % — plain metadata text, not a badge. It's config info, not
+   a status worth flagging with a colored pill; a name next to a number is
+   already legible without a background shape around it. */
 .cat-meta {
   font-family: var(--font-mono);
-  font-size: 10px; color: var(--ink-2);
+  font-size: 11px; color: var(--ink-3);
   letter-spacing: 0.02em;
-  padding: 3px 8px;
-  background: var(--surface-2);
-  border-radius: 999px;
-  display: inline-block;
+  flex-shrink: 0;
 }
-.cat-header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.cat-header-right { display: flex; align-items: center; gap: 2px; flex-shrink: 0; position: relative; }
+
+/* ─── Reorder controls ───
+   Rare action, so it stays out of the way until the header is being
+   looked at — the 3-dot menu is the permanent "there's more here"
+   affordance; these two just ride along with it on hover. */
+.cat-move-btn {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-xs);
+  color: var(--ink-3); font-size: 12px; line-height: 1;
+  opacity: 0;
+  transition: opacity var(--t), background var(--t), color var(--t);
+  pointer-events: none;
+  cursor: pointer;
+}
+.cat-header:hover .cat-move-btn { opacity: 1; pointer-events: auto; }
+.cat-move-btn:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+.cat-move-btn:disabled { cursor: default; pointer-events: none; opacity: 0.25 !important; }
 
 /* Spend progress bar — how much of this month's allocation is spent */
 .cat-spend-bar-wrap {
@@ -756,7 +619,7 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 }
 .cat-target-amounts {
   font-family: var(--font-mono);
-  font-size: 11.5px; color: var(--ink-2);
+  font-size: 12px; color: var(--ink-2);
   letter-spacing: 0.01em;
 }
 .cat-target-pct {
@@ -780,15 +643,15 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 .cat-target-bar-fill.reached { background: var(--green); }
 .cat-target-date {
   font-family: var(--font-mono);
-  font-size: 10px; color: var(--ink-3);
+  font-size: 11px; color: var(--ink-3);
   margin-top: 4px;
 }
 
 /* Pulse feedback when a new entry lands in this card */
 @keyframes cardJustLogged {
-  0%   { box-shadow: var(--shadow-xs); }
+  0%   { box-shadow: none; }
   30%  { box-shadow: 0 0 0 3px var(--accent-dim), var(--shadow-md); transform: scale(1.012); }
-  100% { box-shadow: var(--shadow-xs); transform: scale(1); }
+  100% { box-shadow: none; transform: scale(1); }
 }
 .cat-card.just-logged { animation: cardJustLogged 0.6s ease; }
 
@@ -815,8 +678,7 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   display: block; width: 100%;
   padding: 9px 14px;
   text-align: left; font-family: var(--font);
-  font-size: 12.5px; color: var(--ink-2); cursor: pointer;
-  transition: background var(--t), color var(--t);
+  font-size: 13px; color: var(--ink-2); cursor: pointer;
 }
 .cat-menu-popup-item:hover { background: var(--surface-2); color: var(--ink); }
 .cat-menu-popup-item.danger:hover { background: var(--red-dim); color: var(--red); }
@@ -837,16 +699,12 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 }
 .table-head-primary .th {
   font-family: var(--font-mono);
-  font-size: 8.5px; font-weight: 500;
-  letter-spacing: 0.13em;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--ink-3);
   padding: 10px 0 8px;
 }
 .table-head-primary .th.right { text-align: right; }
-
-.table-head-secondary {
-  display: none;
-}
 
 .table-body {
   flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -876,7 +734,7 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 .tr.eom-marker:hover { background: var(--eom-dim); }
 
 .td.desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-2);
   font-weight: 500;
   white-space: nowrap;
@@ -886,21 +744,27 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
 }
 
 .td {
-  font-size: 12.5px; display: flex; align-items: center;
+  font-size: 12px; display: flex; align-items: center;
   padding: 8px 0;
 }
 
 .td.date {
-  font-family: var(--font-mono); font-size: 10.5px;
+  font-family: var(--font-mono); font-size: 11px;
   color: var(--ink-3);
 }
 .td.change {
-  font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
 }
-.td.change.pos { color: var(--accent); }
+/* Income in green (positive/money-in), expenses left neutral — an
+   expense isn't an error, so it doesn't reach for red; red stays
+   reserved for over-budget and destructive actions only (see the spend
+   bar's .over state and the delete-button hover below). Blue/--accent is
+   reserved for primary actions and focus, never for "this is a positive
+   number." */
+.td.change.pos { color: var(--green); }
 .td.change.neg { color: var(--ink-2); }
 .td.balance {
-  font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
   color: var(--ink); justify-content: flex-end;
 }
 .td.del-cell { justify-content: flex-end; }
@@ -975,12 +839,53 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   line-height: 1.2;
 }
 
+/* ════════════════════════════════
+   POPOVER (contextual, anchored)
+   Used instead of a modal when an action's scope is a single, already-
+   visible item — add/edit a category, log income or an expense to one
+   category, add an income source. Rendered as a single shared panel
+   fixed-positioned on <body> (see #popoverRoot in index.html) and placed
+   next to its trigger by app.js at open time, rather than nested inside
+   whatever scrollable container the trigger happens to live in — this is
+   what lets it open near a card-footer button without being clipped by
+   the category grid's horizontal-scroll container. Cross-cutting or
+   destructive actions stay as centered .modal panels, unchanged above.
+════════════════════════════════ */
+#popoverRoot {
+  position: fixed; inset: 0;
+  z-index: 210;
+  pointer-events: none;
+}
+#popoverRoot.open { pointer-events: all; }
+.pop-panel {
+  position: fixed;
+  width: 320px;
+  max-height: min(420px, calc(100vh - 24px));
+  overflow-y: auto;
+  background: var(--modal-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 20px 20px 18px;
+  opacity: 0;
+  transform: translateY(4px) scale(0.99);
+  transition: opacity 0.15s, transform 0.15s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+#popoverRoot.open .pop-panel { opacity: 1; transform: translateY(0) scale(1); }
+.pop-panel-title {
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 15px; letter-spacing: -0.01em;
+  margin-bottom: 16px; color: var(--ink);
+  line-height: 1.2;
+}
+
 /* Fields */
 .field { margin-bottom: 14px; position: relative; }
 .field label {
   display: block;
   font-family: var(--font-mono);
-  font-size: 9px; font-weight: 500;
+  font-size: 10px; font-weight: 500;
   letter-spacing: 0.13em; text-transform: uppercase;
   color: var(--ink-3); margin-bottom: 6px;
 }
@@ -1000,12 +905,6 @@ html[data-theme="dark"] .topbar-action-btn.primary:hover { background: var(--acc
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
   background: var(--modal-bg);
-}
-.field-optional {
-  text-transform: none;
-  font-weight: 400;
-  letter-spacing: normal;
-  color: var(--ink-4);
 }
 
 /* ════════════════════════════════
@@ -1250,12 +1149,12 @@ html[data-theme="dark"] .btn-danger:hover { background: #c9584a; }
 }
 .dist-row-amt {
   font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
-  color: var(--accent);
+  color: var(--green);
 }
 
 .dist-row-input {
   font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
-  color: var(--accent);
+  color: var(--green);
   width: 80px; text-align: right;
   padding: 5px 7px;
   border-radius: var(--r-xs);
@@ -1361,7 +1260,7 @@ html[data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.14); }
 
 .settings-popup-title {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1372,6 +1271,17 @@ html[data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.14); }
 .settings-popup-title:nth-of-type(2) {
   padding-top: 10px;
   border-top: 1px solid var(--border-soft);
+}
+
+/* "Last backed up" — surfaces persistence.js's existing backup timestamp,
+   which previously had no element to render into. Placed above the
+   export/import actions in the Data section as a quiet trust signal, not
+   a call to action. */
+.settings-last-backed {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-4);
+  padding: 0 4px 8px;
 }
 
 .settings-option {
@@ -1451,25 +1361,4 @@ html[data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.14); }
 .ac-suggestion:hover {
   background: var(--surface-2);
   color: var(--accent);
-}
-
-/* ─── CONTAINER SLIDING/POSITION ARROWS FIX ─── */
-.categories-grid button,
-.categories-scroll button,
-[id*="Grid"] button,
-.cat-card-arrow,
-.move-btn {
-  color: var(--ink-2) !important;
-}
-
-html[data-theme="dark"] .categories-grid button,
-html[data-theme="dark"] .categories-scroll button {
-  color: var(--ink) !important;
-  border-color: var(--border) !important;
-}
-
-html[data-theme="dark"] .categories-grid button svg,
-html[data-theme="dark"] .categories-scroll button svg {
-  fill: var(--ink) !important;
-  stroke: var(--ink) !important;
 }

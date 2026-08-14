@@ -184,8 +184,6 @@ function findPinnedIncomeByDesc(desc) {
 function render() {
   const mk = MONTHS[state.month] + ' ' + state.year;
   document.getElementById('monthLabel').textContent = mk;
-  document.getElementById('summaryMonthLabel').textContent =
-    MONTHS[state.month].slice(0,3) + ' ' + state.year;
   renderIncomes();
   renderSummary();
   renderCatTotals();
@@ -261,7 +259,6 @@ function renderCatTotals() {
     return `
       <div class="cat-total-row">
         <span class="cat-total-name">${escHtml(cat.name)}</span>
-        <span class="cat-total-pct">${cat.pct}%</span>
         <span class="cat-total-val">${fmtMoney(net)}</span>
       </div>`;
   }).join('');
@@ -274,7 +271,6 @@ function renderCatTotals() {
     html += `
       <div class="cat-total-row cat-total-unalloc" title="Income not covered by any category's allocation">
         <span class="cat-total-name">Unallocated</span>
-        <span class="cat-total-pct">${100 - totalPct}%</span>
         <span class="cat-total-val">${fmtMoney(unallocNet)}</span>
       </div>`;
   }
@@ -282,27 +278,47 @@ function renderCatTotals() {
   el.innerHTML = html;
 }
 
-// Determine the id of the last income transaction and last expense transaction
-// for a given month, across ALL categories (used for end-of-month markers).
-// Wait until next month appears before highlighting the past month's actions.
-function endOfMonthMarkers(monthKey) {
-  let lastIncomeId = null, lastExpenseId = null;
-
-  // Only evaluate markers if the active screen's month is fully in the past
+// For every month that is fully in the past (relative to the real
+// calendar date) and has any transactions, finds the single transaction
+// that was the last income and the last expense logged that month,
+// app-wide. Used to draw a divider/highlight at each month boundary
+// inside a category's continuous, all-time transaction list — this used
+// to only ever look at the currently-viewed month (back when the table
+// itself was filtered to one month at a time), but now that the whole
+// history renders as one continuous list, every past month's boundary
+// needs its own marker, not just the focused one.
+function allEndOfMonthMarkers() {
   const now = new Date();
-  const realCurrentYear = now.getFullYear();
-  const realCurrentMonth = now.getMonth();
-
-  if (state.year < realCurrentYear || (state.year === realCurrentYear && state.month < realCurrentMonth)) {
-    const txns = state.transactions.filter(t => t.monthKey === monthKey);
-    for (let i = 0; i < txns.length; i++) {
-      const t = txns[i];
-      if (t.type === 'income')  lastIncomeId  = t.id;
-      if (t.type === 'expense') lastExpenseId = t.id;
-    }
+  const nowKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+  const byMonth = new Map(); // monthKey -> { lastIncome, lastExpense }
+  for (const t of state.transactions) {
+    if (t.monthKey >= nowKey) continue; // only fully-past months get a marker
+    let entry = byMonth.get(t.monthKey);
+    if (!entry) { entry = {}; byMonth.set(t.monthKey, entry); }
+    if (t.type === 'income')  entry.lastIncome  = t.id;
+    if (t.type === 'expense') entry.lastExpense = t.id;
   }
+  const lastIncomeIds = new Set(), lastExpenseIds = new Set();
+  for (const entry of byMonth.values()) {
+    if (entry.lastIncome  != null) lastIncomeIds.add(entry.lastIncome);
+    if (entry.lastExpense != null) lastExpenseIds.add(entry.lastExpense);
+  }
+  return { lastIncomeIds, lastExpenseIds };
+}
 
-  return { lastIncomeId, lastExpenseId };
+// "2026-02" -> "February 2026"
+function fmtMonthKey(mk) {
+  const [y, m] = mk.split('-').map(Number);
+  return MONTHS[m] + ' ' + y;
+}
+
+// Sorts a category's transactions into true chronological order. Array.sort
+// is stable (guaranteed since ES2019), so transactions logged within the
+// same month keep their original insertion order relative to each other —
+// this only reorders across month boundaries, for the rare case where
+// someone navigates back and logs a late entry into an earlier month.
+function sortByMonthKey(txns) {
+  return [...txns].sort((a, b) => a.monthKey < b.monthKey ? -1 : a.monthKey > b.monthKey ? 1 : 0);
 }
 
 // Swaps category ordering slots
@@ -318,49 +334,34 @@ function moveCategory(fromIndex, toIndex) {
 function renderCategories() {
   const grid = document.getElementById('categoriesGrid');
 
-  const monthTxns = txnsForCurrentMonth();
+  const monthTxns = txnsForCurrentMonth(); // still used for the "this month" spend bar below
   const totalPct = state.categories.reduce((s,c) => s + c.pct, 0);
   const hasUnallocTxns = state.transactions.some(t => t.catId === UNALLOC_ID);
   const showUnallocCard = (state.categories.length > 0 && totalPct < 100) || hasUnallocTxns;
 
   if (state.categories.length === 0 && !showUnallocCard) {
-    grid.innerHTML = `<div class="grid-empty-hint">Add a category to begin</div>`;
+    grid.innerHTML = `<div class="grid-empty-hint">No categories yet — add one to begin.</div>`;
     return;
   }
 
-  const { lastIncomeId, lastExpenseId } = endOfMonthMarkers(currentMonthKey());
+  const { lastIncomeIds, lastExpenseIds } = allEndOfMonthMarkers();
 
   let cardsHtml = state.categories.map((cat, i) => {
-    const txns = monthTxns.filter(t => t.catId === cat.id);
-
-    // Compute running balance rows
-    let running = 0;
-    const rows = txns.map(t => {
-      running += t.amount;
-      const changeClass = t.amount >= 0 ? 'pos' : 'neg';
-      const changeStr   = (t.amount >= 0 ? '+' : '−') + fmtMoney(t.amount);
-      const isMarker = (t.id === lastIncomeId) || (t.id === lastExpenseId);
-      const markerClass = isMarker ? ' eom-marker' : '';
-      const markerTitle = isMarker ? ' title="Final ' + (t.type === 'income' ? 'income' : 'expense') + ' of the month"' : '';
-      const descCell = t.desc
-        ? `<div class="td desc" title="${escHtml(t.desc)}">${escHtml(t.desc)}</div>`
-        : `<div class="td desc"></div>`;
-      return `
-        <div class="tr${markerClass}"${markerTitle}>
-          <div class="td date">${escHtml(t.date)}</div>
-          ${descCell}
-          <div class="td change ${changeClass}">${changeStr}</div>
-          <div class="td balance">${fmtMoney(running)}</div>
-          <div class="td del-cell">
-            <button class="tr-del-btn" onclick="deleteTransaction(event,${t.id})">✕</button>
-          </div>
-        </div>`;
-    }).join('');
+    // The ledger itself is now the category's full, continuous history —
+    // not filtered to the focused month — so it accumulates the way a
+    // real running balance should, instead of restarting empty every
+    // month. The month arrows (see changeMonth/scrollAllTablesToMonth)
+    // scroll to a position in this same list rather than swapping it out.
+    const allTxns = sortByMonthKey(state.transactions.filter(t => t.catId === cat.id));
+    const tableHtml = buildTxnTableHtml(cat.id, allTxns, lastIncomeIds, lastExpenseIds, '');
 
     const disableLeft = (i === 0) ? 'disabled' : '';
     const disableRight = (i === state.categories.length - 1) ? 'disabled' : '';
 
-    // Spend progress: how much of what landed in this category this month has been spent.
+    // Spend progress stays a "this month" concept on purpose — it's a
+    // monthly-budget question ("how much of what I allocated this month
+    // is spent"), not a ledger question, so it still uses monthTxns.
+    const txns = monthTxns.filter(t => t.catId === cat.id);
     const catIncome = txns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const catSpent = txns.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
     let spendBarHtml = '';
@@ -380,9 +381,9 @@ function renderCategories() {
         <div class="cat-header">
           <div class="cat-header-left">
             <span class="cat-name">${escHtml(cat.name)}</span>
-            <span class="cat-meta">${cat.pct}% allocation</span>
+            <span class="cat-meta">${cat.pct}%</span>
           </div>
-          <div class="cat-header-right" style="position:relative">
+          <div class="cat-header-right">
             <button class="cat-move-btn" ${disableLeft} onclick="moveCategory(${i}, ${i - 1})" title="Move left">&lt;</button>
             <button class="cat-move-btn" ${disableRight} onclick="moveCategory(${i}, ${i + 1})" title="Move right">&gt;</button>
             <button class="cat-menu-btn"
@@ -390,7 +391,7 @@ function renderCategories() {
               title="Options">⋮</button>
             <div class="cat-menu-popup" id="menu-${cat.id}" style="display:none">
               <button class="cat-menu-popup-item"
-                onclick="openModal('edit-category','${cat.id}')">Edit name &amp; allocation</button>
+                onclick="openPopover(event,'edit-category','${cat.id}', this.closest('.cat-header-right').querySelector('.cat-menu-btn'))">Edit name &amp; allocation</button>
               <div class="cat-menu-popup-sep"></div>
               <button class="cat-menu-popup-item danger"
                 onclick="confirmDeleteCategory('${cat.id}')">Delete category</button>
@@ -400,41 +401,60 @@ function renderCategories() {
         ${spendBarHtml}
         ${targetHtml}
 
-        <div class="cat-table">
-          <div class="table-head-primary">
-            <span class="th">Date</span>
-            <span class="th">Desc</span>
-            <span class="th">Amount</span>
-            <span class="th right">Balance</span>
-            <span class="th"></span>
-          </div>
-          <div class="table-head-secondary">
-            <span class="th-sub">When</span>
-            <span class="th-sub">Added / taken</span>
-            <span class="th-sub right">Running total</span>
-            <span class="th-sub"></span>
-          </div>
-          <div class="table-body" id="tbody-${cat.id}">${rows}</div>
-        </div>
+        ${tableHtml}
 
         <div class="cat-footer">
           <button class="cat-footer-btn"
-            onclick="openModal('cat-income','${cat.id}')">+ Add income</button>
+            onclick="openPopover(event,'cat-income','${cat.id}', this)">+ Add income</button>
           <button class="cat-footer-btn"
-            onclick="openModal('cat-expense','${cat.id}')">− Log expense</button>
+            onclick="openPopover(event,'cat-expense','${cat.id}', this)">− Log expense</button>
         </div>
       </div>`;
   }).join('');
 
   if (showUnallocCard) {
-    const unallocTxns = monthTxns.filter(t => t.catId === UNALLOC_ID);
-    cardsHtml += renderUnallocCard(unallocTxns, lastIncomeId, lastExpenseId, totalPct);
+    const allUnallocTxns = sortByMonthKey(state.transactions.filter(t => t.catId === UNALLOC_ID));
+    cardsHtml += renderUnallocCard(allUnallocTxns, lastIncomeIds, lastExpenseIds, totalPct);
   }
 
   grid.innerHTML = cardsHtml;
 
-  // Scroll each table body to the latest entry
-  document.querySelectorAll('.table-body').forEach(b => { b.scrollTop = b.scrollHeight; });
+  // Scroll every table to wherever the currently-focused month sits in its
+  // (now continuous, all-time) history — this is what the month arrows
+  // actually do: not re-filter the data, just move the "you are here"
+  // scroll position. On first load this lands near the bottom naturally,
+  // since the focused month defaults to today's real month, which for
+  // most people is also the most recent one with data.
+  scrollAllTablesToMonth(currentMonthKey());
+}
+
+// Places the scroll position of every table body so the target month's
+// first transaction is at the top of the visible area. If the target
+// month has no transactions of its own (e.g. you skipped logging a
+// month, or you've paged past all real data into the future), it lands
+// on the nearest month that does — the next one after it if there is
+// one, otherwise the very last entry, so you're never left staring at a
+// scroll position with no context for where "now" is relative to it.
+function scrollAllTablesToMonth(monthKey) {
+  document.querySelectorAll('.table-body').forEach(body => {
+    const rows = body.querySelectorAll('.tr');
+    if (rows.length === 0) return; // nothing to scroll to (just an empty hint)
+
+    let target = null;
+    for (const row of rows) {
+      if (row.dataset.monthkey >= monthKey) { target = row; break; }
+    }
+    // No later-or-equal month exists — the target month is after
+    // everything logged so far; land on the most recent entry.
+    if (!target) target = rows[rows.length - 1];
+
+    const targetTop = target.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop;
+    if (typeof body.scrollTo === 'function') {
+      body.scrollTo({ top: targetTop, behavior: 'smooth' });
+    } else {
+      body.scrollTop = targetTop;
+    }
+  });
 }
 
 // Formats a stored 'YYYY-MM' target date as e.g. "Dec 2026" for display.
@@ -469,23 +489,28 @@ function renderCategoryTarget(cat) {
     </div>`;
 }
 
-// Renders the Unallocated bucket as its own card in the main grid — same
-// transaction-row shape as a normal category card, but read-only (no
-// reorder/edit/delete-category controls, since it isn't a real category).
-function renderUnallocCard(txns, lastIncomeId, lastExpenseId, totalPct) {
+// ─── TRANSACTION TABLE (shared by category cards + the Unallocated card) ───
+// Always renders the full, continuous history handed to it — no
+// collapsing. A category can have a long list now that it spans every
+// month instead of just one, and that's the point: it should always be
+// possible to scroll all the way down to the latest entry, or scroll up
+// through everything that came before it, exactly like a real ledger.
+function buildTxnTableHtml(tableId, txns, lastIncomeIds, lastExpenseIds, emptyHintHtml) {
   let running = 0;
-  const rows = txns.map(t => {
+  const rowsHtml = txns.map(t => {
     running += t.amount;
     const changeClass = t.amount >= 0 ? 'pos' : 'neg';
     const changeStr   = (t.amount >= 0 ? '+' : '−') + fmtMoney(t.amount);
-    const isMarker = (t.id === lastIncomeId) || (t.id === lastExpenseId);
+    const isMarker = lastIncomeIds.has(t.id) || lastExpenseIds.has(t.id);
     const markerClass = isMarker ? ' eom-marker' : '';
-    const markerTitle = isMarker ? ' title="Final ' + (t.type === 'income' ? 'income' : 'expense') + ' of the month"' : '';
+    const markerTitle = isMarker
+      ? ` title="Final ${t.type === 'income' ? 'income' : 'expense'} of ${escHtml(fmtMonthKey(t.monthKey))}"`
+      : '';
     const descCell = t.desc
       ? `<div class="td desc" title="${escHtml(t.desc)}">${escHtml(t.desc)}</div>`
       : `<div class="td desc"></div>`;
     return `
-      <div class="tr${markerClass}"${markerTitle}>
+      <div class="tr${markerClass}" data-monthkey="${t.monthKey}"${markerTitle}>
         <div class="td date">${escHtml(t.date)}</div>
         ${descCell}
         <div class="td change ${changeClass}">${changeStr}</div>
@@ -496,7 +521,26 @@ function renderUnallocCard(txns, lastIncomeId, lastExpenseId, totalPct) {
       </div>`;
   }).join('');
 
+  return `
+    <div class="cat-table">
+      <div class="table-head-primary">
+        <span class="th">Date</span>
+        <span class="th">Desc</span>
+        <span class="th">Amount</span>
+        <span class="th right">Balance</span>
+        <span class="th"></span>
+      </div>
+      <div class="table-body" id="tbody-${tableId}">${rowsHtml || emptyHintHtml || ''}</div>
+    </div>`;
+}
+
+// Renders the Unallocated bucket as its own card in the main grid — same
+// transaction-row shape as a normal category card (now the same
+// continuous, all-time history too), but read-only (no reorder/edit/
+// delete-category controls, since it isn't a real category).
+function renderUnallocCard(txns, lastIncomeIds, lastExpenseIds, totalPct) {
   const emptyHint = `<div class="grid-empty-hint" style="padding:20px 0">No income has landed here.</div>`;
+  const tableHtml = buildTxnTableHtml('unalloc', txns, lastIncomeIds, lastExpenseIds, emptyHint);
 
   return `
     <div class="cat-card cat-card-unalloc" id="card-unalloc">
@@ -507,22 +551,7 @@ function renderUnallocCard(txns, lastIncomeId, lastExpenseId, totalPct) {
         </div>
       </div>
 
-      <div class="cat-table">
-        <div class="table-head-primary">
-          <span class="th">Date</span>
-          <span class="th">Desc</span>
-          <span class="th">Amount</span>
-          <span class="th right">Balance</span>
-          <span class="th"></span>
-        </div>
-        <div class="table-head-secondary">
-          <span class="th-sub">When</span>
-          <span class="th-sub">Added / taken</span>
-          <span class="th-sub right">Running total</span>
-          <span class="th-sub"></span>
-        </div>
-        <div class="table-body" id="tbody-unalloc">${rows || emptyHint}</div>
-      </div>
+      ${tableHtml}
 
       <div class="cat-footer">
         <span class="cat-footer-note">Add or expand categories to allocate this money — nothing here is lost.</span>
@@ -547,8 +576,18 @@ function closeAllMenus() {
   openMenuCatId = null;
   closeSettingsPopup();
   closeAllMonthYearPickers();
+  closePopover();
 }
 document.addEventListener('click', () => closeAllMenus());
+// The popover is fixed-positioned off a rect captured at open time, not
+// nested inside whatever scrolled — so unlike the menu/settings popups
+// (which scroll naturally with their anchor), it has to be dismissed
+// explicitly rather than re-anchored.
+document.addEventListener('DOMContentLoaded', () => {
+  const catsScroll = document.querySelector('.categories-scroll');
+  if (catsScroll) catsScroll.addEventListener('scroll', () => closePopover(), { passive: true });
+  window.addEventListener('resize', () => closePopover());
+});
 
 // ─── MONTH NAV ───
 function changeMonth(dir) {
@@ -578,6 +617,7 @@ function toggleSettings(e) {
   if (!isOpen) {
     renderSettingsPopup();
     popup.style.display = 'block';
+    updateLastBackedUpLabel();
   }
 }
 function closeSettingsPopup() {
@@ -600,6 +640,7 @@ function renderSettingsPopup() {
     </button>
     <div class="settings-popup-title" style="margin-top:10px">Data</div>
     <div class="settings-popup-note">Your data is stored only on this device and never leaves it. Export a backup anytime.</div>
+    <div class="settings-last-backed" id="lastBackedUpLabel"></div>
     <button class="settings-option" onclick="event.stopPropagation(); exportBackupJSON()">
       <span>Export backup (.json)</span>
     </button>
@@ -783,32 +824,16 @@ function importBackupJSON(event) {
 }
 
 // ─── MODALS ───
+// Cross-cutting (affects every category at once) or destructive actions
+// only. Single-item actions scoped to one visible card or one "+ Add"
+// button live in the popover system below instead (see openPopover).
 function openModal(type, data) {
   closeAllMenus();
   const overlay = document.getElementById('modalOverlay');
   const content = document.getElementById('modalContent');
 
-  // ── Add income source ──
-  if (type === 'income') {
-    content.innerHTML = `
-      <div class="modal-title">Add Income Source</div>
-      <div class="field"><label>Name</label>
-        <input id="mi-name" placeholder="e.g. Monthly Salary" autofocus /></div>
-      <div class="field"><label>Amount ($)</label>
-        <input id="mi-amount" type="number" min="0" step="0.01" placeholder="0.00" /></div>
-      <div class="field"><label>Type</label>
-        <select id="mi-type">
-          <option value="Recurring">Recurring</option>
-          <option value="Manual">Manual</option>
-          <option value="One-time">One-time</option>
-        </select></div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" onclick="addIncome()">Add</button>
-      </div>`;
-
   // ── Income distribution preview (clicking a pinned income) ──
-  } else if (type === 'income-dist') {
+  if (type === 'income-dist') {
     const src = state.incomes.find(i => i.id === data);
     if (!src) return;
     const distRows = state.categories.map(cat => {
@@ -886,84 +911,6 @@ function openModal(type, data) {
         <button class="btn-confirm" onclick="addExpense()">Log</button>
       </div>`;
 
-  // ── Add income to specific category ──
-  } else if (type === 'cat-income') {
-    const cat = state.categories.find(c => c.id === data);
-    if (!cat) return;
-    content.innerHTML = `
-      <div class="modal-title">Add Income — ${escHtml(cat.name)}</div>
-      <div class="field autocomplete-field"><label>Description</label>
-        <input id="ci-desc" placeholder="e.g. Salary" autocomplete="off"
-          oninput="updateDescSuggestions('ci-desc')"
-          onfocus="updateDescSuggestions('ci-desc')" autofocus />
-        <div class="ac-suggestions" id="ci-desc-suggestions"></div></div>
-      <div class="field"><label>Amount ($)</label>
-        <input id="ci-amount" type="number" min="0" step="0.01" placeholder="0.00" /></div>
-      <div class="field"><label>Date</label>
-        <input id="ci-date" placeholder="${todayLabel()}" /></div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" onclick="addDirectIncome('${cat.id}')">Add</button>
-      </div>`;
-
-  // ── Log expense in specific category ──
-  } else if (type === 'cat-expense') {
-    const cat = state.categories.find(c => c.id === data);
-    if (!cat) return;
-    content.innerHTML = `
-      <div class="modal-title">Log Expense — ${escHtml(cat.name)}</div>
-      <div class="field autocomplete-field"><label>Description</label>
-        <input id="ce-desc" placeholder="e.g. Groceries" autocomplete="off"
-          oninput="updateDescSuggestions('ce-desc')"
-          onfocus="updateDescSuggestions('ce-desc')" autofocus />
-        <div class="ac-suggestions" id="ce-desc-suggestions"></div></div>
-      <div class="field"><label>Amount ($)</label>
-        <input id="ce-amount" type="number" min="0" step="0.01" placeholder="0.00" /></div>
-      <div class="field"><label>Date</label>
-        <input id="ce-date" placeholder="${todayLabel()}" /></div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" onclick="addDirectExpense('${cat.id}')">Log</button>
-      </div>`;
-
-  // ── Add category ──
-  } else if (type === 'category') {
-    const used = state.categories.reduce((s,c) => s + c.pct, 0);
-    const rem  = 100 - used;
-    content.innerHTML = `
-      <div class="modal-title">Add Category</div>
-      <div class="field"><label>Name</label>
-        <input id="mc-name" placeholder="e.g. Savings" autofocus /></div>
-      <div class="field"><label>Allocation %</label>
-        <input id="mc-pct" type="number" min="1" max="${rem}" placeholder="${rem}" /></div>
-      <div class="modal-note" id="allocFeedback">${used}% allocated — ${rem}% remaining</div>
-      ${targetSectionHtml('mc', null, null)}
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" onclick="addCategory()">Add</button>
-      </div>`;
-    initMonthYearPicker('mc', null);
-
-  // ── Edit category (name + %) ──
-  } else if (type === 'edit-category') {
-    const cat = state.categories.find(c => c.id === data);
-    if (!cat) return;
-    const usedExcl = state.categories.filter(c=>c.id!==data).reduce((s,c)=>s+c.pct,0);
-    const maxPct   = 100 - usedExcl;
-    content.innerHTML = `
-      <div class="modal-title">Edit Category</div>
-      <div class="field"><label>Name</label>
-        <input id="ec-name" value="${escHtml(cat.name)}" autofocus /></div>
-      <div class="field"><label>Allocation %</label>
-        <input id="ec-pct" type="number" min="1" max="${maxPct}" value="${cat.pct}" /></div>
-      <div class="modal-note">Max available: ${maxPct}%</div>
-      ${targetSectionHtml('ec', cat.target, cat.targetDate)}
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-confirm" onclick="saveEditCategory('${cat.id}')">Save</button>
-      </div>`;
-    initMonthYearPicker('ec', cat.targetDate || null);
-
   // ── Confirm delete category ──
   } else if (type === 'confirm-delete-category') {
     const cat = state.categories.find(c => c.id === data);
@@ -982,6 +929,165 @@ function openModal(type, data) {
   }
 
   overlay.classList.add('open');
+}
+
+// ─── POPOVERS ───
+// For actions scoped to a single, already-visible item: add/edit a
+// category, add an income source, add income or log an expense on one
+// specific category. Rendered into a single shared panel that's fixed-
+// positioned on <body> (not nested inside the scrolling category grid or
+// sidebar), then placed next to whichever element triggered it. This is
+// what lets a popover open below a card's footer button without being
+// clipped by the category grid's horizontal-scroll container — a real
+// problem a DOM-nested popup would hit there.
+//
+// Every branch below is the same markup, same field ids, and same
+// validation/save functions the old centered modals used — only the
+// container it renders into and the close call at the end changed.
+let openPopoverType = null;
+
+function openPopover(e, type, id, anchorEl) {
+  e.stopPropagation();
+  if (!anchorEl) return;
+  const anchorRect = anchorEl.getBoundingClientRect();
+  closeAllMenus();
+  const root  = document.getElementById('popoverRoot');
+  const panel = document.getElementById('popoverPanel');
+  if (!root || !panel) return;
+
+  if (type === 'income') {
+    panel.innerHTML = `
+      <div class="pop-panel-title">Add Income Source</div>
+      <div class="field"><label>Name</label>
+        <input id="mi-name" placeholder="e.g. Monthly Salary" autofocus /></div>
+      <div class="field"><label>Amount ($)</label>
+        <input id="mi-amount" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+      <div class="field"><label>Type</label>
+        <select id="mi-type">
+          <option value="Recurring">Recurring</option>
+          <option value="Manual">Manual</option>
+          <option value="One-time">One-time</option>
+        </select></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePopover()">Cancel</button>
+        <button class="btn-confirm" onclick="addIncome()">Add</button>
+      </div>`;
+
+  } else if (type === 'cat-income') {
+    const cat = state.categories.find(c => c.id === id);
+    if (!cat) return;
+    panel.innerHTML = `
+      <div class="pop-panel-title">Add Income — ${escHtml(cat.name)}</div>
+      <div class="field autocomplete-field"><label>Description</label>
+        <input id="ci-desc" placeholder="e.g. Salary" autocomplete="off"
+          oninput="updateDescSuggestions('ci-desc')"
+          onfocus="updateDescSuggestions('ci-desc')" autofocus />
+        <div class="ac-suggestions" id="ci-desc-suggestions"></div></div>
+      <div class="field"><label>Amount ($)</label>
+        <input id="ci-amount" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+      <div class="field"><label>Date</label>
+        <input id="ci-date" placeholder="${todayLabel()}" /></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePopover()">Cancel</button>
+        <button class="btn-confirm" onclick="addDirectIncome('${cat.id}')">Add</button>
+      </div>`;
+
+  } else if (type === 'cat-expense') {
+    const cat = state.categories.find(c => c.id === id);
+    if (!cat) return;
+    panel.innerHTML = `
+      <div class="pop-panel-title">Log Expense — ${escHtml(cat.name)}</div>
+      <div class="field autocomplete-field"><label>Description</label>
+        <input id="ce-desc" placeholder="e.g. Groceries" autocomplete="off"
+          oninput="updateDescSuggestions('ce-desc')"
+          onfocus="updateDescSuggestions('ce-desc')" autofocus />
+        <div class="ac-suggestions" id="ce-desc-suggestions"></div></div>
+      <div class="field"><label>Amount ($)</label>
+        <input id="ce-amount" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+      <div class="field"><label>Date</label>
+        <input id="ce-date" placeholder="${todayLabel()}" /></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePopover()">Cancel</button>
+        <button class="btn-confirm" onclick="addDirectExpense('${cat.id}')">Log</button>
+      </div>`;
+
+  } else if (type === 'category') {
+    const used = state.categories.reduce((s,c) => s + c.pct, 0);
+    const rem  = 100 - used;
+    panel.innerHTML = `
+      <div class="pop-panel-title">Add Category</div>
+      <div class="field"><label>Name</label>
+        <input id="mc-name" placeholder="e.g. Savings" autofocus /></div>
+      <div class="field"><label>Allocation %</label>
+        <input id="mc-pct" type="number" min="1" max="${rem}" placeholder="${rem}" /></div>
+      <div class="modal-note" id="allocFeedback">${used}% allocated — ${rem}% remaining</div>
+      ${targetSectionHtml('mc', null, null)}
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePopover()">Cancel</button>
+        <button class="btn-confirm" onclick="addCategory()">Add</button>
+      </div>`;
+    initMonthYearPicker('mc', null);
+
+  } else if (type === 'edit-category') {
+    const cat = state.categories.find(c => c.id === id);
+    if (!cat) return;
+    const usedExcl = state.categories.filter(c=>c.id!==id).reduce((s,c)=>s+c.pct,0);
+    const maxPct   = 100 - usedExcl;
+    panel.innerHTML = `
+      <div class="pop-panel-title">Edit Category</div>
+      <div class="field"><label>Name</label>
+        <input id="ec-name" value="${escHtml(cat.name)}" autofocus /></div>
+      <div class="field"><label>Allocation %</label>
+        <input id="ec-pct" type="number" min="1" max="${maxPct}" value="${cat.pct}" /></div>
+      <div class="modal-note">Max available: ${maxPct}%</div>
+      ${targetSectionHtml('ec', cat.target, cat.targetDate)}
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePopover()">Cancel</button>
+        <button class="btn-confirm" onclick="saveEditCategory('${cat.id}')">Save</button>
+      </div>`;
+    initMonthYearPicker('ec', cat.targetDate || null);
+
+  } else {
+    return;
+  }
+
+  openPopoverType = type;
+  root.classList.add('open');
+  positionPopover(anchorRect, panel);
+}
+
+// Places the panel next to its trigger, clamped to stay on-screen: right-
+// aligned instead of left-aligned when it would overflow the right edge,
+// and flipped above the trigger instead of below when it would overflow
+// the bottom. Runs as a fixed-position calculation off the trigger's own
+// bounding rect, so it's unaffected by whatever scrollable container
+// (category grid, sidebar) the trigger happens to sit inside.
+function positionPopover(anchorRect, panel) {
+  const margin = 12;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const panelWidth = panel.offsetWidth || 320;
+
+  let left = anchorRect.left;
+  if (left + panelWidth > vw - margin) left = anchorRect.right - panelWidth;
+  left = Math.max(margin, Math.min(left, vw - panelWidth - margin));
+
+  let top = anchorRect.bottom + 8;
+  panel.style.left = left + 'px';
+  panel.style.top = top + 'px';
+
+  requestAnimationFrame(() => {
+    const panelHeight = panel.offsetHeight;
+    if (top + panelHeight > vh - margin) {
+      const flippedTop = anchorRect.top - panelHeight - 8;
+      panel.style.top = Math.max(margin, flippedTop) + 'px';
+    }
+  });
+}
+
+function closePopover() {
+  const root = document.getElementById('popoverRoot');
+  if (root) root.classList.remove('open');
+  openPopoverType = null;
 }
 
 // ─── DESCRIPTION AUTOCOMPLETE ───
@@ -1079,7 +1185,7 @@ function addIncome() {
   if (!name) { showToast('Enter a name.'); return; }
   if (isNaN(amount) || amount <= 0) { showToast('Enter a valid amount.'); return; }
   state.incomes.push({ id: state.nextId++, name, amount, type });
-  closeModal(); render();
+  closePopover(); render();
   showSuccessToast(`"${name}" added`);
 }
 
@@ -1207,7 +1313,7 @@ function addDirectIncome(catId) {
     id: state.nextId++, catId, monthKey: currentMonthKey(),
     date, desc, amount: amount, type: 'income'
   });
-  closeModal(); render();
+  closePopover(); render();
   pulseCards([catId]);
   showSuccessToast(`+${fmtMoney(amount)} added`);
 }
@@ -1241,7 +1347,7 @@ function addDirectExpense(catId) {
     id: state.nextId++, catId, monthKey: currentMonthKey(),
     date, desc, amount: -amount, type: 'expense'
   });
-  closeModal(); render();
+  closePopover(); render();
   pulseCards([catId]);
   showSuccessToast(`−${fmtMoney(amount)} logged`);
 }
@@ -1476,7 +1582,7 @@ function addCategory() {
   const t = readOptionalTarget('mc');
   if (t.error) { showToast(t.error); return; }
   state.categories.push({ id: 'cat_' + state.nextId++, name, pct, target: t.target, targetDate: t.targetDate });
-  closeModal(); render();
+  closePopover(); render();
   showSuccessToast(`"${name}" added (${pct}%)`);
 }
 
@@ -1495,7 +1601,7 @@ function saveEditCategory(catId) {
   cat.pct  = pct;
   cat.target = t.target;
   cat.targetDate = t.targetDate;
-  closeModal(); render();
+  closePopover(); render();
   showSuccessToast(`Category updated`);
 }
 
@@ -1574,6 +1680,8 @@ async function showSuccessUndoToast(msg, undoFn) {
 applyTheme(loadTheme());
 
 async function init() {
+  applyTheme(loadTheme());
+
   const loaded = await loadState();     // null on fresh install; recovery modal handled internally
   state = loaded || defaultState();
 
