@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Welcome to Aquilate</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <style>
     /* ─── DESIGN SYSTEM TOKENS (Synchronized with style.css) ─── */
@@ -27,9 +27,9 @@
       --green:       #2f8f57;
       --red:         #c8493a;
       --red-dim:     rgba(200, 73, 58, 0.08);
-      --font:        'Inter', Helvetica, Arial, sans-serif;
-      --font-serif:  'Inter', Helvetica, Arial, sans-serif;
-      --font-mono:   'JetBrains Mono', 'Fira Mono', monospace;
+      --font:         'Inter', Helvetica, Arial, sans-serif;
+      --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+      --font-mono:    'JetBrains Mono', 'Fira Mono', monospace;
       --r-sm:        8px;
       --r:           10px;
       --r-lg:        14px;
@@ -126,13 +126,13 @@
 
     /* ─── TYPOGRAPHY ─── */
     h1 {
-      font-family: var(--font);
+      font-family: var(--font-display);
       font-weight: 600;
-      font-size: 26px;
-      line-height: 1.25;
+      font-size: 28px;
+      line-height: 1.2;
       margin-bottom: 14px;
       color: var(--ink);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.022em;
     }
     p {
       font-size: 13.5px;

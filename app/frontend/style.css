@@ -46,18 +46,39 @@
   --r-lg:  14px;
   --r-xl:  18px;
 
-  /* Shadows — diffuse, low-contrast */
+  /* Shadows — biased downward and tightened with negative spread so each
+     reads as a specific surface catching light from above, not a generic
+     ambient glow floating evenly around the whole element. */
   --shadow-xs: 0 1px 2px rgba(0,0,0,0.02);
-  --shadow:    0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02);
-  --shadow-md: 0 8px 20px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.03);
-  --shadow-lg: 0 20px 40px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.02);
+  --shadow:    0 5px 10px -3px rgba(0,0,0,0.035), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-md: 0 10px 18px -4px rgba(0,0,0,0.045), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-lg: 0 24px 38px -8px rgba(0,0,0,0.055), 0 2px 6px -1px rgba(0,0,0,0.025);
 
-  /* Typography */
-  --font:      'Inter', Helvetica, Arial, sans-serif;
-  --font-serif:'Inter', Helvetica, Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
+  /* Typography — three distinct roles, not one family wearing three hats.
+     --font-display carries names/headings/logo (the few places a page's
+     personality should show); --font stays the workhorse for UI chrome,
+     labels and body copy; --font-mono is reserved for anything that is
+     literally a number or a code-like value. */
+  --font:         'Inter', Helvetica, Arial, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono:    'JetBrains Mono', 'Fira Mono', monospace;
+
+  /* Letter-spacing scale — tracking is tightened by size, not copy-pasted
+     at one value onto every heading regardless of how large it is. */
+  --ls-tight-sm:  0;         /* < 15px */
+  --ls-tight-md:  -0.008em;  /* 15–17px */
+  --ls-tight-lg:  -0.014em;  /* 18–19px */
+  --ls-tight-xl:  -0.02em;   /* 20px+ */
 
   --t: 0.16s ease;
+  /* Motion curves — differentiated by what kind of element is moving,
+     rather than one spring reused everywhere. Small/frequent transient
+     UI (toast) gets a sharp deceleration; anchored menus/popovers get a
+     brief, low-overshoot settle; the modal — blocking and the highest-
+     stakes surface — settles the slowest with almost no bounce. */
+  --ease-snap:    cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-menu:    cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-modal:   cubic-bezier(0.19, 1, 0.32, 1);
 
   --modal-bg: #ffffff;
 }
@@ -163,11 +184,11 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
 /* Logo */
 .logo {
   display: flex; align-items: center; gap: 10px;
-  font-family: var(--font);
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--ink);
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ls-tight-lg);
   user-select: none;
 }
 
@@ -351,7 +372,7 @@ html[data-theme="dark"] .topbar { background: rgba(26,28,32,0.85); }
   font-family: var(--font-mono);
   font-size: 14px; font-weight: 500;
   color: var(--ink);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ls-tight-sm);
 }
 .summary-plain-val.pos { color: var(--green); }
 
@@ -377,7 +398,7 @@ html[data-theme="dark"] .balance-row { background: var(--accent); }
   font-family: var(--font-mono);
   font-size: 20px; font-weight: 600;
   color: #fff;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ls-tight-xl);
 }
 
 
@@ -552,10 +573,10 @@ html[data-theme="dark"] .toolbar-btn.primary:hover { background: var(--accent-h)
 .cat-header-left { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
 
 .cat-name {
-  font-family: var(--font);
-  font-weight: 700;
-  font-size: 16px; color: var(--ink);
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px; color: var(--ink);
+  letter-spacing: var(--ls-tight-md);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* Allocation % — plain metadata text, not a badge. It's config info, not
@@ -825,16 +846,16 @@ html[data-theme="dark"] .toolbar-btn.primary:hover { background: var(--accent-h)
   padding: 28px 28px 24px;
   width: 380px;
   box-shadow: var(--shadow-lg);
-  transform: translateY(10px) scale(0.99);
-  transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transform: translateY(8px) scale(0.99);
+  transition: transform 0.28s var(--ease-modal);
   max-height: 90%; overflow-y: auto;
 }
 .modal-overlay.open .modal { transform: translateY(0) scale(1); }
 
 .modal-title {
-  font-family: var(--font);
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: 18px; letter-spacing: -0.01em;
+  font-size: 19px; letter-spacing: var(--ls-tight-lg);
   margin-bottom: 20px; color: var(--ink);
   line-height: 1.2;
 }
@@ -869,13 +890,13 @@ html[data-theme="dark"] .toolbar-btn.primary:hover { background: var(--accent-h)
   padding: 20px 20px 18px;
   opacity: 0;
   transform: translateY(4px) scale(0.99);
-  transition: opacity 0.15s, transform 0.15s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transition: opacity 0.14s, transform 0.14s var(--ease-menu);
 }
 #popoverRoot.open .pop-panel { opacity: 1; transform: translateY(0) scale(1); }
 .pop-panel-title {
   font-family: var(--font);
   font-weight: 600;
-  font-size: 15px; letter-spacing: -0.01em;
+  font-size: 15px; letter-spacing: var(--ls-tight-sm);
   margin-bottom: 16px; color: var(--ink);
   line-height: 1.2;
 }
@@ -884,10 +905,9 @@ html[data-theme="dark"] .toolbar-btn.primary:hover { background: var(--accent-h)
 .field { margin-bottom: 14px; position: relative; }
 .field label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 10px; font-weight: 500;
-  letter-spacing: 0.13em; text-transform: uppercase;
-  color: var(--ink-3); margin-bottom: 6px;
+  font-family: var(--font);
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-2); margin-bottom: 6px;
 }
 .field input,
 .field select {
@@ -1194,8 +1214,8 @@ html[data-theme="dark"] .btn-danger:hover { background: #c9584a; }
   font-family: var(--font); font-size: 12.5px; font-weight: 500;
   letter-spacing: 0.01em;
   box-shadow: var(--shadow-md);
-  transform: translateY(15px); opacity: 0;
-  transition: transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.18s ease, background var(--t), color var(--t);
+  transform: translateY(12px); opacity: 0;
+  transition: transform 0.22s var(--ease-snap), opacity 0.16s ease, background var(--t), color var(--t);
   z-index: 300;
   pointer-events: none;
   max-width: 300px;
@@ -1250,11 +1270,11 @@ html[data-theme="dark"] .toast-undo:hover { background: rgba(0,0,0,0.14); }
   z-index: 250;
   min-width: 190px;
   padding: 12px;
-  animation: settingsPopupIn 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: settingsPopupIn 0.14s var(--ease-menu);
   transform-origin: top right;
 }
 @keyframes settingsPopupIn {
-  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  from { opacity: 0; transform: scale(0.97) translateY(-3px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
